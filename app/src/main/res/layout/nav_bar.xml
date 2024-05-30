@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="90dp"
+    android:layout_alignParentBottom="true"
+    android:orientation="horizontal"
+    android:weightSum="3"
+    android:background="@color/basic">
+
+    <!-- 홈 이미지 -->
+    <ImageView
+        android:id="@+id/nav_home"
+        android:layout_gravity="center"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:layout_weight="1"
+        android:src="@drawable/home"
+        android:contentDescription="Home" />
+
+    <!-- 게임 이미지 -->
+    <ImageView
+        android:id="@+id/nav_game"
+        android:layout_gravity="center"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:layout_weight="1"
+        android:src="@drawable/game"
+        android:contentDescription="Game" />
+
+    <!-- 계정 이미지 -->
+    <ImageView
+        android:id="@+id/nav_user"
+        android:layout_gravity="center"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:layout_weight="1"
+        android:src="@drawable/user"
+        android:contentDescription="User" />
+</LinearLayout>
