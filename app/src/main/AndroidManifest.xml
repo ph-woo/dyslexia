@@ -33,6 +33,21 @@
             android:exported="true" />
 
         <activity
+            android:name=".EyeTracking"
+            android:theme="@style/Theme.Eye_reading"
+            android:exported="true" />
+          
+        <activity
+            android:name=".GameActivity"
+            android:theme="@style/Theme.Eye_reading"
+            android:exported="true" />
+
+        <activity
+            android:name=".ShopActivity"
+            android:theme="@style/Theme.Eye_reading"
+            android:exported="true" />
+
+        <activity
             android:name=".GameActivity"
             android:theme="@style/Theme.Eye_reading"
             android:exported="true" />
@@ -49,11 +64,6 @@
 
         <activity
             android:name=".SongActivity"
-            android:theme="@style/Theme.Eye_reading"
-            android:exported="true" />
-
-        <activity
-            android:name=".EyeTracking"
             android:theme="@style/Theme.Eye_reading"
             android:exported="true" />
 

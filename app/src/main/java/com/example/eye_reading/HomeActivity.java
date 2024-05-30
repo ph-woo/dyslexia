@@ -98,8 +98,8 @@ public class HomeActivity extends AppCompatActivity {
         BtnShop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(HomeActivity.this, "캐릭터 사러가기 클릭됨", Toast.LENGTH_SHORT).show();
-                // 캐릭터 상점 화면으로 이동
+                Intent shopIntent = new Intent(HomeActivity.this, ShopActivity.class);
+                startActivity(shopIntent);
             }
         });
 

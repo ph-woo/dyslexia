@@ -1,5 +1,7 @@
 package com.example.eye_reading;
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.speech.tts.TextToSpeech;
@@ -26,18 +28,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 public class DeliveryActivity extends AppCompatActivity {
-
-
-    private static final String TAG = DeliveryActivity.class.getSimpleName();
-
-//    private String targetWord = "사과";
-    private String targetWord;
-//    private String[] candidateWords = {"자과", "차과"};
-    private String[] candidateWords;
-
     private DatabaseReference databaseReference;
+  
+    private List<WordPair> wordList;
+    private String targetWord;
+    private String[] candidateWords;
+    private int bookmarks = 0;
     private TextToSpeech tts;
     private TextView house1Text, house2Text, house3Text;
     private ImageView truck;
@@ -47,6 +46,7 @@ public class DeliveryActivity extends AppCompatActivity {
     private boolean truckMoving = false;
     private float initialTruckX, initialTruckY;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,29 +85,21 @@ public class DeliveryActivity extends AppCompatActivity {
         house2Text = findViewById(R.id.house2_word);
         house3Text = findViewById(R.id.house3_word);
 
-        List<String> words = new ArrayList<>(Arrays.asList(candidateWords));
-        words.add(targetWord);
-
-        Collections.shuffle(words);
-
-        house1Text.setText(words.get(0));
-        house2Text.setText(words.get(1));
-        house3Text.setText(words.get(2));
-
         // Save initial position of the truck
         truck.post(() -> {
             initialTruckX = truck.getX();
             initialTruckY = truck.getY();
         });
 
-        // Start countdown timer
-        startTimer();
-
         ImageView btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> onBackPressed());
 
         ImageView soundButton = findViewById(R.id.sound);
         soundButton.setOnClickListener(v -> speakOut(targetWord));
+
+        initWordList();
+        startTimer();
+        startNewGame();
 
         // Set onTouchListener for the truck image
         truck.setOnTouchListener(new View.OnTouchListener() {
@@ -191,32 +183,44 @@ public class DeliveryActivity extends AppCompatActivity {
         });
     }
 
+    private void initWordList() {
+        wordList = new ArrayList<>();
+        wordList.add(new DeliveryActivity.WordPair("사과", new String[]{"자과", "차과"}));
+        wordList.add(new DeliveryActivity.WordPair("과자", new String[]{"과사", "과차"}));
+        wordList.add(new DeliveryActivity.WordPair("의자", new String[]{"의사", "의차"}));
+        wordList.add(new DeliveryActivity.WordPair("우유", new String[]{"유유", "으유"}));
+        wordList.add(new DeliveryActivity.WordPair("하늘", new String[]{"하들", "하를"}));
+        wordList.add(new DeliveryActivity.WordPair("토끼", new String[]{"토기", "토키"}));
+        wordList.add(new DeliveryActivity.WordPair("포도", new String[]{"포노", "포토"}));
+        wordList.add(new DeliveryActivity.WordPair("비누", new String[]{"비두", "비투"}));
+        wordList.add(new DeliveryActivity.WordPair("그네", new String[]{"그내", "그니"}));
+        wordList.add(new DeliveryActivity.WordPair("학교", new String[]{"학고", "학그"}));
+        // 단어 추가
+    }
+
     private void checkHouse(View truck) {
         ImageView house1 = findViewById(R.id.house1);
         ImageView house2 = findViewById(R.id.house2);
         ImageView house3 = findViewById(R.id.house3);
 
         if (isViewOverlapping(truck, house1)) {
-            if (house1Text.getText().toString().equals(targetWord)) {
-                showToast("배달 완료!");
-            } else {
-                showToast("배달 실패");
-            }
-            finish();
+            handleHouseDelivery(house1Text.getText().toString());
         } else if (isViewOverlapping(truck, house2)) {
-            if (house2Text.getText().toString().equals(targetWord)) {
-                showToast("배달 완료!");
-            } else {
-                showToast("배달 실패");
-            }
-            finish();
+            handleHouseDelivery(house2Text.getText().toString());
         } else if (isViewOverlapping(truck, house3)) {
-            if (house3Text.getText().toString().equals(targetWord)) {
-                showToast("배달 완료!");
-            } else {
-                showToast("배달 실패");
-            }
-            finish();
+            handleHouseDelivery(house3Text.getText().toString());
+        }
+    }
+
+    private void handleHouseDelivery(String chosenWord) {
+        if (chosenWord.equals(targetWord)) {
+            bookmarks++;
+            showToast("배달 완료! 책갈피 획득: " + bookmarks);
+            startNewGame();
+        } else {
+            showToast("다시 배달해주세요.");
+            truck.setX(initialTruckX);
+            truck.setY(initialTruckY);
         }
     }
 
@@ -252,11 +256,45 @@ public class DeliveryActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
                 timerText.setText("00:00");
-                showToast("시간 초과로 배달 실패");
+                showGameOverDialog();
                 // Game over logic here
-                finish();
             }
         }.start();
+    }
+
+    private void startNewGame() {
+        Random random = new Random();
+        DeliveryActivity.WordPair selectedPair = wordList.get(random.nextInt(wordList.size()));
+        targetWord = selectedPair.targetWord;
+        candidateWords = selectedPair.candidateWords;
+
+        List<String> words = new ArrayList<>(Arrays.asList(candidateWords));
+        words.add(targetWord);
+
+        Collections.shuffle(words);
+
+        house1Text.setText(words.get(0));
+        house2Text.setText(words.get(1));
+        house3Text.setText(words.get(2));
+
+        speakOut(targetWord);
+
+        truck.setX(initialTruckX);
+        truck.setY(initialTruckY);
+    }
+
+    private void showGameOverDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("게임 종료");
+        builder.setMessage("획득한 책갈피 수: " + bookmarks);
+        builder.setPositiveButton("다시 플레이하기", (dialog, which) -> {
+            bookmarks = 0;
+            startTimer();
+            startNewGame();
+        });
+        builder.setNegativeButton("나가기", (dialog, which) -> finish());
+        builder.setCancelable(false);
+        builder.show();
     }
 
     @Override
@@ -271,5 +309,15 @@ public class DeliveryActivity extends AppCompatActivity {
         }
 
         super.onDestroy();
+    }
+
+    private static class WordPair {
+        String targetWord;
+        String[] candidateWords;
+
+        WordPair(String targetWord, String[] candidateWords) {
+            this.targetWord = targetWord;
+            this.candidateWords = candidateWords;
+        }
     }
 }
