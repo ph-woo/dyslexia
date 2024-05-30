@@ -1,5 +1,6 @@
 package com.example.eye_reading;
 
+import android.app.AlertDialog;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -11,16 +12,19 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
 public class BubbleActivity extends AppCompatActivity {
-    private String targetWord = "자동차";
-    private char[] targetChars = {'ㅈ', 'ㅏ', 'ㄷ', 'ㅗ', 'ㅇ', 'ㅊ', 'ㅏ'};
-    private int currentIndex = 0;
+    private List<WordCharacterPair> wordList;
+    private String targetWord;
+    private char[] targetChars;
+    private int currentIndex;
     private int lives = 3;
+    private int bookmarks = 0;
     private TextToSpeech tts;
     private List<ImageView> heartImages;
 
@@ -42,7 +46,48 @@ public class BubbleActivity extends AppCompatActivity {
         ImageView btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> onBackPressed());
 
+        heartImages = new ArrayList<>();
+        heartImages.add(findViewById(R.id.heart1));
+        heartImages.add(findViewById(R.id.heart2));
+        heartImages.add(findViewById(R.id.heart3));
+
+        ImageView soundButton = findViewById(R.id.sound);
+        soundButton.setOnClickListener(v -> speakOut(targetWord));
+
+        initWordList();
+        startNewGame();
+    }
+
+    private void initWordList() {
+        wordList = new ArrayList<>();
+        wordList.add(new WordCharacterPair("자동차", new char[]{'ㅈ', 'ㅏ', 'ㄷ', 'ㅗ', 'ㅇ', 'ㅊ', 'ㅏ'}));
+        wordList.add(new WordCharacterPair("강아지", new char[]{'ㄱ', 'ㅏ', 'ㅇ', 'ㅇ', 'ㅏ', 'ㅈ', 'ㅣ'}));
+        wordList.add(new WordCharacterPair("고양이", new char[]{'ㄱ', 'ㅗ', 'ㅇ', 'ㅑ', 'ㅇ', 'ㅇ', 'ㅣ'}));
+        wordList.add(new WordCharacterPair("지우개", new char[]{'ㅈ', 'ㅣ', 'ㅇ', 'ㅜ', 'ㄱ', 'ㅐ'}));
+        wordList.add(new WordCharacterPair("색연필", new char[]{'ㅅ', 'ㅐ', 'ㄱ', 'ㅇ', 'ㅕ', 'ㄴ', 'ㅍ', 'ㅣ', 'ㄹ'}));
+        wordList.add(new WordCharacterPair("지하철", new char[]{'ㅈ', 'ㅣ', 'ㅎ', 'ㅏ', 'ㅊ', 'ㅓ', 'ㄹ'}));
+        wordList.add(new WordCharacterPair("개나리", new char[]{'ㄱ', 'ㅐ', 'ㄴ', 'ㅏ', 'ㄹ', 'ㅣ'}));
+        wordList.add(new WordCharacterPair("비행기", new char[]{'ㅂ', 'ㅣ', 'ㅎ', 'ㅐ', 'ㅇ', 'ㄱ', 'ㅣ'}));
+        wordList.add(new WordCharacterPair("피아노", new char[]{'ㅍ', 'ㅣ', 'ㅇ', 'ㅏ', 'ㄴ', 'ㅗ'}));
+        wordList.add(new WordCharacterPair("선생님", new char[]{'ㅅ', 'ㅓ', 'ㄴ', 'ㅅ', 'ㅐ', 'ㅇ', 'ㄴ', 'ㅣ', 'ㅁ'}));
+        // 단어 추가
+    }
+
+    private void startNewGame() {
+        Random random = new Random();
+        WordCharacterPair selectedPair = wordList.get(random.nextInt(wordList.size()));
+        targetWord = selectedPair.word;
+        targetChars = selectedPair.characters;
+        currentIndex = 0;
+
+        speakOut(targetWord);
+
         RelativeLayout container = findViewById(R.id.container);
+        container.removeAllViews();
+        setupBubbles(container);
+    }
+
+    private void setupBubbles(RelativeLayout container) {
         int numBubbles = 15;
         int bubbleSize = 80; // in dp
         int minDistance = 100; // in dp, minimum distance between bubbles
@@ -52,37 +97,28 @@ public class BubbleActivity extends AppCompatActivity {
         int bubbleSizeInPx = (int) (bubbleSize * scale + 0.5f);
         int minDistanceInPx = (int) (minDistance * scale + 0.5f);
 
-        // List of characters to include in bubbles
         char[] characters = {'ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ',
                 'ㅏ', 'ㅑ', 'ㅓ', 'ㅕ', 'ㅗ', 'ㅛ', 'ㅜ', 'ㅠ', 'ㅡ', 'ㅣ'};
         Random random = new Random();
 
-        heartImages = new ArrayList<>();
-        heartImages.add(findViewById(R.id.heart1));
-        heartImages.add(findViewById(R.id.heart2));
-        heartImages.add(findViewById(R.id.heart3));
+        List<int[]> positions = new ArrayList<>();
+        List<Character> bubbleCharacters = new ArrayList<>();
 
-        ImageView soundButton = findViewById(R.id.sound);
-        soundButton.setOnClickListener(v -> speakOut(targetWord));
+        // Ensure targetChars are included
+        for (char targetChar : targetChars) {
+            bubbleCharacters.add(targetChar);
+        }
+        // Fill remaining bubbles with random characters
+        while (bubbleCharacters.size() < numBubbles) {
+            bubbleCharacters.add(characters[random.nextInt(characters.length)]);
+        }
 
-        // Wait until layout is drawn to get the correct width and height
+        // Shuffle the characters
+        java.util.Collections.shuffle(bubbleCharacters);
+
         container.post(() -> {
             int layoutWidth = container.getWidth();
             int layoutHeight = container.getHeight();
-            List<int[]> positions = new ArrayList<>();
-            List<Character> bubbleCharacters = new ArrayList<>();
-
-            // Ensure targetChars are included
-            for (char targetChar : targetChars) {
-                bubbleCharacters.add(targetChar);
-            }
-            // Fill remaining bubbles with random characters
-            while (bubbleCharacters.size() < numBubbles) {
-                bubbleCharacters.add(characters[random.nextInt(characters.length)]);
-            }
-
-            // Shuffle the characters
-            java.util.Collections.shuffle(bubbleCharacters);
 
             for (int i = 0; i < numBubbles; i++) {
                 int leftMargin, topMargin;
@@ -147,8 +183,9 @@ public class BubbleActivity extends AppCompatActivity {
             textView.setTextColor(Color.GREEN);
             currentIndex++;
             if (currentIndex == targetChars.length) {
-                // Game success logic here
-                showToast("게임 성공!");
+                bookmarks++;
+                showToast("게임 성공! 책갈피 획득: " + bookmarks);
+                startNewGame();
             }
         } else {
             textView.setTextColor(Color.RED);
@@ -161,8 +198,7 @@ public class BubbleActivity extends AppCompatActivity {
             lives--;
             updateHearts();
             if (lives == 0) {
-                // Game over logic here
-                showToast("게임 실패");
+                showGameOverDialog();
             }
         }
     }
@@ -185,13 +221,37 @@ public class BubbleActivity extends AppCompatActivity {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
+    private void showGameOverDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("게임 종료");
+        builder.setMessage("획득한 책갈피 수: " + bookmarks);
+        builder.setPositiveButton("다시 플레이하기", (dialog, which) -> {
+            lives = 3;
+            bookmarks = 0;
+            updateHearts();
+            startNewGame();
+        });
+        builder.setNegativeButton("나가기", (dialog, which) -> finish());
+        builder.setCancelable(false);
+        builder.show();
+    }
+
     @Override
     protected void onDestroy() {
         if (tts != null) {
             tts.stop();
             tts.shutdown();
         }
-
         super.onDestroy();
+    }
+
+    private static class WordCharacterPair {
+        String word;
+        char[] characters;
+
+        WordCharacterPair(String word, char[] characters) {
+            this.word = word;
+            this.characters = characters;
+        }
     }
 }

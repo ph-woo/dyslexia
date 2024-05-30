@@ -87,6 +87,8 @@ public class LyricsActivity extends AppCompatActivity {
         gazeTrackerManager = GazeTrackerManager.getInstance();
         Log.i(TAG, "gazeTracker version: " + GazeTracker.getVersionName());
 
+        ImageView btnBack = findViewById(R.id.btn_back);
+        btnBack.setOnClickListener(v -> onBackPressed());
 
         timerText = findViewById(R.id.timer_text);
 
