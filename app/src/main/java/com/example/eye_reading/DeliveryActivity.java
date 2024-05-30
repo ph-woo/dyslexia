@@ -3,13 +3,23 @@ package com.example.eye_reading;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.speech.tts.TextToSpeech;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -18,8 +28,16 @@ import java.util.List;
 import java.util.Locale;
 
 public class DeliveryActivity extends AppCompatActivity {
-    private String targetWord = "사과";
-    private String[] candidateWords = {"자과", "차과"};
+
+
+    private static final String TAG = DeliveryActivity.class.getSimpleName();
+
+//    private String targetWord = "사과";
+    private String targetWord;
+//    private String[] candidateWords = {"자과", "차과"};
+    private String[] candidateWords;
+
+    private DatabaseReference databaseReference;
     private TextToSpeech tts;
     private TextView house1Text, house2Text, house3Text;
     private ImageView truck;
@@ -33,6 +51,21 @@ public class DeliveryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_delivery);
+
+
+        databaseReference = FirebaseDatabase.getInstance("https://song-62299-default-rtdb.firebaseio.com/").getReference();
+
+
+        try {
+            fetchData();
+        } catch (Exception e) {
+            Log.e(TAG, "Error in fetchSongData: ", e);
+        }
+
+    }
+
+
+    private void initializeGame() {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
@@ -110,6 +143,50 @@ public class DeliveryActivity extends AppCompatActivity {
                         return true;
                 }
                 return false;
+            }
+        });
+
+    }
+
+
+
+    private void fetchData() {
+
+
+        databaseReference.child("twowords").child("twoword1").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    List<String> candidateWordsList = (List<String>) dataSnapshot.child("candidateWords").getValue();
+
+                        // targetWord를 리스트 형식으로 가져옵니다.
+                        List<String> targetWordList = (List<String>) dataSnapshot.child("targetWord").getValue();
+
+                        // 리스트에서 첫 번째 요소를 가져와서 문자열로 변환합니다.
+                        if (targetWordList != null && !targetWordList.isEmpty()) {
+                            String targetWordValue = targetWordList.get(0);
+
+                            if (candidateWordsList != null && targetWordValue != null) {
+
+                                candidateWords = candidateWordsList.toArray(new String[0]);
+                                // targetWord를 설정한다
+                                targetWord = targetWordValue;
+                                initializeGame();
+
+                            }
+                        } else {
+                            Log.e(TAG, "targetWord list is null or empty");
+                        }
+                    } else {
+                        Log.e(TAG, "targetChars is not a List");
+                    }
+                }
+
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(DeliveryActivity.this, "Failed to load data", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "DatabaseError: ", databaseError.toException());
             }
         });
     }

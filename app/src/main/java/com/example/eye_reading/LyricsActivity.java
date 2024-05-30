@@ -40,6 +40,8 @@ import visual.camp.sample.view.GazePathView;
 import android.widget.ImageView;
 
 public class LyricsActivity extends AppCompatActivity {
+
+    String songTitle = null; // 변수를 먼저 선언하고 초기화
     private static final String TAG = LyricsActivity.class.getSimpleName();
     private DatabaseReference databaseReference;
     private final ViewLayoutChecker viewLayoutChecker = new ViewLayoutChecker();
@@ -71,6 +73,20 @@ public class LyricsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lyrics);
+
+
+
+
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("SONG_TITLE")) {
+            songTitle = intent.getStringExtra("SONG_TITLE");
+            // songTitle을 사용하여 작업 수행
+            Log.d("EyeTracking", "Received song title: " + songTitle);
+        } else {
+            Log.e("EyeTracking", "No song title provided");
+        }
+
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
@@ -102,7 +118,9 @@ public class LyricsActivity extends AppCompatActivity {
 
 
     private void fetchSongData() {
-        databaseReference.child("songs").child("song1").addListenerForSingleValueEvent(new ValueEventListener() {
+
+System.out.println(songTitle);
+        databaseReference.child("songs").child(songTitle).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {

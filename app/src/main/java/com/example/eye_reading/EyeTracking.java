@@ -54,6 +54,9 @@ import visual.camp.sample.view.EyeBlinkView;
 import visual.camp.sample.view.PointView;
 
 public class EyeTracking extends AppCompatActivity {
+
+    String songTitle = null; // 변수를 먼저 선언하고 초기화
+
     private static final String TAG = EyeTracking.class.getSimpleName();
     private static final String[] PERMISSIONS = new String[]{
             Manifest.permission.CAMERA // 시선 추적 input
@@ -82,8 +85,25 @@ public class EyeTracking extends AppCompatActivity {
     private Map<Button, Long> gazeStartTimeMap = new HashMap<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
+
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_eye);
+
+
+
+
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("SONG_TITLE")) {
+            songTitle = intent.getStringExtra("SONG_TITLE");
+            // songTitle을 사용하여 작업 수행
+            Log.d("EyeTracking", "Received song title: " + songTitle);
+        } else {
+            Log.e("EyeTracking", "No song title provided");
+        }
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
@@ -903,8 +923,13 @@ public class EyeTracking extends AppCompatActivity {
       setViewAtGazeTrackerState();
     }
 
+
+
     private void showGuiDemo() {
-      Intent intent = new Intent(getApplicationContext(), LyricsActivity.class);
-      startActivity(intent);
+
+System.out.println(songTitle);
+        Intent doubleintent = new Intent(getApplicationContext(), LyricsActivity.class);
+        doubleintent.putExtra("SONG_TITLE", songTitle);
+        startActivity(doubleintent);
     }
 }
