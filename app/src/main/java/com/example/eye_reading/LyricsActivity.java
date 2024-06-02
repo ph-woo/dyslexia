@@ -46,7 +46,7 @@ public class LyricsActivity extends AppCompatActivity {
     private int lives = 3; // 목숨의 개수
     private List<ImageView> heartImages;
 
-    private static final long GAZE_HOLD_DURATION = 800; // 0.8초
+    private static final long GAZE_HOLD_DURATION = 850; // 0.85초로 수정했습니다.
 
     /////// 각 버튼에 대한 시선 시작 시간을 저장하는 맵을 생성합니다.
     private Map<TextView, Long> gazeStartTimeMap = new HashMap<>();

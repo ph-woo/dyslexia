@@ -9,9 +9,13 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import camp.visual.gazetracker.callback.GazeCallback;
+import camp.visual.gazetracker.gaze.GazeInfo;
+import camp.visual.gazetracker.state.EyeMovementState;
+import camp.visual.gazetracker.util.ViewLayoutChecker;
+import camp.visual.gazetracker.filter.OneEuroFilterManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,24 +24,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
-import camp.visual.gazetracker.callback.GazeCallback;
-import camp.visual.gazetracker.filter.OneEuroFilterManager;
-import camp.visual.gazetracker.gaze.GazeInfo;
-import camp.visual.gazetracker.state.EyeMovementState;
+
 import camp.visual.gazetracker.util.ViewLayoutChecker;
 import visual.camp.sample.view.GazePathView;
-import com.example.eye_reading.GazeTrackerManager;
-import camp.visual.gazetracker.GazeTracker;
 
 public class BubbleActivity extends AppCompatActivity {
 
     private static final String TAG = BubbleActivity.class.getSimpleName();
-    private GazePathView gazePathView;
-    private List<TextView> bubbleTextViews = new ArrayList<>(); // TextView 객체들을 담을 리스트 선언
-    private final ViewLayoutChecker viewLayoutChecker = new ViewLayoutChecker();
-    private GazeTrackerManager gazeTrackerManager;
-    private final OneEuroFilterManager oneEuroFilterManager = new OneEuroFilterManager(
-            2, 30, 0.5F, 0.001F, 1.0F);
     private String targetWord = "자동차";
     private char[] targetChars = {'ㅈ', 'ㅏ', 'ㄷ', 'ㅗ', 'ㅇ', 'ㅊ', 'ㅏ'};
     private int currentIndex = 0;
@@ -45,10 +38,18 @@ public class BubbleActivity extends AppCompatActivity {
     private TextToSpeech tts;
     private List<ImageView> heartImages;
 
-    // 각 버튼에 대한 시선 시작 시간을 저장하는 맵을 생성합니다.
-    private Map<TextView, Long> gazeStartTimeMap = new HashMap<>();
+    private GazePathView gazePathView;
+    private GazeTrackerManager gazeTrackerManager;
+    private final ViewLayoutChecker viewLayoutChecker = new ViewLayoutChecker();
 
-    private static final long GAZE_HOLD_DURATION = 1000; // 1초
+    private final OneEuroFilterManager oneEuroFilterManager = new OneEuroFilterManager(
+            2, 30, 0.5F, 0.001F, 1.0F);
+
+    private Map<ImageView, Long> gazeStartTimeMap = new HashMap<>();
+    private static final long GAZE_HOLD_DURATION = 700; // 0.7초
+
+    private ImageView[] images;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +58,10 @@ public class BubbleActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
+
+        gazeTrackerManager = GazeTrackerManager.getInstance();
+
+
 
         tts = new TextToSpeech(this, status -> {
             if (status != TextToSpeech.ERROR) {
@@ -87,14 +92,19 @@ public class BubbleActivity extends AppCompatActivity {
         heartImages.add(findViewById(R.id.heart1));
         heartImages.add(findViewById(R.id.heart2));
         heartImages.add(findViewById(R.id.heart3));
+        gazePathView = findViewById(R.id.gazePathView);
 
         ImageView soundButton = findViewById(R.id.sound);
         soundButton.setOnClickListener(v -> speakOut(targetWord));
 
+        images = new ImageView[numBubbles];
+
         // Wait until layout is drawn to get the correct width and height
+
         container.post(() -> {
             int layoutWidth = container.getWidth();
             int layoutHeight = container.getHeight();
+            Log.d("WIDGET_POS",String.valueOf(layoutHeight) + "," + String.valueOf(layoutWidth));
             List<int[]> positions = new ArrayList<>();
             List<Character> bubbleCharacters = new ArrayList<>();
 
@@ -135,6 +145,7 @@ public class BubbleActivity extends AppCompatActivity {
 
                 // Create ImageView for the bubble
                 ImageView bubble = new ImageView(BubbleActivity.this);
+                images[i] = bubble;
                 Drawable bubbleDrawable = ContextCompat.getDrawable(BubbleActivity.this, R.drawable.bubble);
                 bubble.setImageDrawable(bubbleDrawable);
 
@@ -211,33 +222,22 @@ public class BubbleActivity extends AppCompatActivity {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
+
     @Override
-    protected void onDestroy() {
-        if (tts != null) {
-            tts.stop();
-            tts.shutdown();
-        }
-
-        super.onDestroy();
+    protected void onStart() {
+        super.onStart();
+        Log.i(TAG, "onStart");
+        gazeTrackerManager.setGazeTrackerCallbacks(gazeCallback);
+        
     }
-/*
 
-        @Override
-        protected void onStart() {
-            super.onStart();
-            Log.i(TAG, "onStart");
-            gazeTrackerManager.setGazeTrackerCallbacks(gazeCallback);
-            initView();
-        }
-
-        @Override
-        protected void onResume() {
-             super.onResume();
-        Log.i(TAG, "onResume");
-        // 화면 전환후에도 체크하기 위해
-        setOffsetOfView();
+    @Override
+    protected void onResume() {
+        super.onResume();
         gazeTrackerManager.startGazeTracking();
-        }
+        setOffsetOfView();
+        Log.i(TAG, "onResume");
+    }
 
     @Override
     protected void onPause() {
@@ -253,10 +253,14 @@ public class BubbleActivity extends AppCompatActivity {
         Log.i(TAG, "onStop");
     }
 
-*/
-    private void initView() {
-        gazePathView = findViewById(R.id.gazePathView);
+    @Override
+    protected void onDestroy() {
+        if (tts != null) {
+            tts.stop();
+            tts.shutdown();
+        }
 
+        super.onDestroy();
     }
 
     private void setOffsetOfView() {
@@ -268,6 +272,7 @@ public class BubbleActivity extends AppCompatActivity {
         });
     }
 
+
     private final GazeCallback gazeCallback = new GazeCallback() {
         @Override
         public void onGaze(GazeInfo gazeInfo) {
@@ -278,38 +283,37 @@ public class BubbleActivity extends AppCompatActivity {
             }
         }
     };
-
-
     private void handleGazeEvent(float gazeX, float gazeY) {
         long currentTime = System.currentTimeMillis();
-        for (TextView textView : bubbleTextViews) {
+        for (ImageView imageView : images) {
             int[] location = new int[2];
-            textView.getLocationOnScreen(location);
+            imageView.getLocationOnScreen(location);
             float x = location[0];
             float y = location[1];
-            float width = textView.getWidth();
-            float height = textView.getHeight();
+            float width = imageView.getWidth();
+            float height = imageView.getHeight();
 
-            // 시선이 특정 TextView 위에 있는지 확인
+            // 시선이 특정 imageView 위에 있는지 확인
             if (gazeX >= x && gazeX <= x + width && gazeY >= y && gazeY <= y + height) {
-                if (!gazeStartTimeMap.containsKey(textView)) {
-                    gazeStartTimeMap.put(textView, currentTime);
+                if (!gazeStartTimeMap.containsKey(imageView)) {
+                    gazeStartTimeMap.put(imageView, currentTime);
                 } else {
-                    long gazeDuration = currentTime - gazeStartTimeMap.get(textView);
+                    long gazeDuration = currentTime - gazeStartTimeMap.get(imageView);
                     if (gazeDuration >= GAZE_HOLD_DURATION) {
                         // 메인 스레드에서 UI 업데이트 수행
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                textView.performClick();
+                                imageView.performClick();
                             }
                         });
-                        gazeStartTimeMap.remove(textView); // 시선이 유지된 후 맵에서 제거
+                        gazeStartTimeMap.remove(imageView); // 시선이 유지된 후 맵에서 제거
                     }
                 }
             } else {
-                gazeStartTimeMap.remove(textView); // 시선이 벗어나면 맵에서 제거
+                gazeStartTimeMap.remove(imageView); // 시선이 벗어나면 맵에서 제거
             }
         }
     }
+
 }

@@ -74,10 +74,13 @@ public class SongActivity extends AppCompatActivity {
             songButton.setLayoutParams(params);
 
             // 버튼 클릭 이벤트 설정
+            int tempI = i+1;
             songButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(SongActivity.this, EyeTracking.class);
+                    //Intent intent = new Intent(SongActivity.this, EyeTracking.class);
+                    Intent intent = new Intent(SongActivity.this, SongGameActivity.class);
+                    intent.putExtra("number", tempI);
                     startActivity(intent);
                 }
             });

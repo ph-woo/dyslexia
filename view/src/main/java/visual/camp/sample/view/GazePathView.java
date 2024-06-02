@@ -17,13 +17,16 @@ import java.util.List;
 
 public class GazePathView extends View {
 
-  private static final float MIN_POINT_RADIUS = 40; //
-  private static final float MAX_POINT_RADIUS = 65; //
-  private static final long MAX_FIXATION_SIZE_TIME = 350; //
+  private static final float MIN_POINT_RADIUS = 45;
+  private static final float MAX_POINT_RADIUS = 55;
+  private static final long MAX_FIXATION_SIZE_TIME = 450;
   private static final float SACCADE_LINE_WIDTH = 2.F;
-  private static final long SACCADE_POINT_REFRESH_TIME_MILLIS = 0; //
-  private static final float MIN_FIXATION_POSITION_THRESHOLD = 0; //
-  private final int DEFAULT_COLOR = Color.LTGRAY; //
+  private static final long SACCADE_POINT_REFRESH_TIME_MILLIS = 0;
+  private static final float MIN_FIXATION_POSITION_THRESHOLD = 0;
+  private final int DEFAULT_COLOR = 0xE5FF0000; // RED
+
+
+
 
   public GazePathView(Context context) {
     super(context);

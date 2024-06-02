@@ -6,12 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".BubbleActivity">
 
-    <visual.camp.sample.view.GazePathView
-        android:id="@+id/gazePathView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-         />
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -65,5 +59,13 @@
         android:layout_below="@id/top_bar"
         android:id="@+id/container">
     </RelativeLayout>
+
+    <visual.camp.sample.view.GazePathView
+        android:id="@+id/gazePathView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="106dp"
+        tools:layout_editor_absoluteY="16dp"
+        />
 
 </RelativeLayout>

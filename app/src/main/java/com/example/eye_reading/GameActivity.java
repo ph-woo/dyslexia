@@ -791,16 +791,16 @@ public class GameActivity extends AppCompatActivity {
       getSupportActionBar().hide();
       switch (result) {
         case SUCCESS:
-          showToast("setCalibrationData success", false);
+          showToast("빨간 점을 바라보세요", false);//showToast("setCalibrationData success", false);
           break;
         case FAIL_DOING_CALIBRATION:
-          showToast("calibrating", false);
+          showToast("빨간 점을 바라보세요", false);//showToast("calibrating", false);
           break;
         case FAIL_NO_CALIBRATION_DATA:
-          showToast("Calibration data is null", true);
+          showToast("빨간 점을 바라보세요", true);// showToast("Calibration data is null", true);
           break;
         case FAIL_HAS_NO_TRACKER:
-          showToast("No tracker has initialized", true);
+          showToast("다시 시도하세요", true);//showToast("No tracker has initialized", true);
           break;
       }
       setViewAtGazeTrackerState();

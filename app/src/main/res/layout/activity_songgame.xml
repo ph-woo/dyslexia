@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_color">
+
+    <visual.camp.sample.view.GazePathView
+        android:id="@+id/gazePathView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="106dp"
+        tools:layout_editor_absoluteY="16dp" />
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+
+            <View
+                android:layout_width="7dp"
+                android:layout_height="24dp"
+                android:layout_weight="4" />
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="10dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/sandclock" />
+
+            <!-- timerTextView -->
+            <TextView
+                android:id="@+id/timerTextView"
+                android:layout_width="76dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:padding="8dp"
+                android:text="00:00"
+                android:textColor="@android:color/black"
+                android:textSize="28sp" />
+
+            <!-- Icon ImageView -->
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginLeft="3dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/newheartred" />
+
+
+            <!-- Lives TextView -->
+            <TextView
+                android:id="@+id/livesTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="0dp"
+                android:text="3개"
+                android:textColor="@android:color/holo_red_dark"
+                android:textSize="20sp"
+
+                />
+        </LinearLayout>
+
+
+        <!-- LinearLayouts to hold buttons -->
+        <LinearLayout
+            android:id="@+id/buttonsLayout1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="16dp" />
+
+        <LinearLayout
+            android:id="@+id/buttonsLayout2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="16dp" />
+
+        <LinearLayout
+            android:id="@+id/buttonsLayout3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="16dp" />
+
+        <LinearLayout
+            android:id="@+id/buttonsLayout4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="16dp" />
+
+        <LinearLayout
+            android:id="@+id/buttonsLayout5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="16dp" />
+
+        <LinearLayout
+            android:id="@+id/buttonsLayout6"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="16dp" />
+
+        <!-- Repeat LinearLayouts for additional rows -->
+
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
