@@ -13,11 +13,7 @@ public class Song {
         return title;
     }
 
-    public int getCleared() {
+    public int isCleared() {
         return isCleared;
-    }
-
-    public void setCleared(int isCleared) {
-        this.isCleared = isCleared;
     }
 }

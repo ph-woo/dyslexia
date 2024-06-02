@@ -2,50 +2,21 @@ package com.example.eye_reading;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SongActivity extends AppCompatActivity {
-
-    String nickname = "";
-    String userkey = "";
-    DatabaseReference database;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_song);
-
-        Intent gameIntent = getIntent();
-        if (gameIntent != null && gameIntent.hasExtra("USERNAME")) {
-            nickname = gameIntent.getStringExtra("USERNAME");
-            Log.d("HomeAct", "Received nickname: " + nickname);
-        } else {
-            Log.e("HomeAct", "No nickname provided");
-        }
-
-        if (gameIntent != null && gameIntent.hasExtra("USERKEY")) {
-            userkey = gameIntent.getStringExtra("USERKEY");
-            Log.d("HomeAct", "Received userkey: " + userkey);
-        } else {
-            Log.e("HomeAct", "No userkey provided");
-        }
-
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
@@ -57,78 +28,18 @@ public class SongActivity extends AppCompatActivity {
         ImageView navGame = findViewById(R.id.nav_game);
         ImageView navUser = findViewById(R.id.nav_user);
 
-        database = FirebaseDatabase.getInstance("https://song-62299-default-rtdb.firebaseio.com/").getReference();
-
-        loadSongsAndStatus();
-
-        navHome.setOnClickListener(v -> {
-            Intent homeIntent = new Intent(SongActivity.this, HomeActivity.class);
-            startActivity(homeIntent);
-        });
-    }
-
-    private void loadSongsAndStatus() {
         List<Song> songList = new ArrayList<>();
+        songList.add(new Song("학교종이 땡땡땡", 1));
+        songList.add(new Song("곰 세 마리", 1));
+        songList.add(new Song("아기 상어", 0));
+        songList.add(new Song("떴다떴다 비행기", -1));
+        songList.add(new Song("다음 노래", -1));
+        songList.add(new Song("다다음 노래", -1));
+        songList.add(new Song("다다다음 노래", -1));
+
         LinearLayout songListContainer = findViewById(R.id.song_list);
 
-        // 노래 목록 가져오기
-        database.child("songs").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot songSnapshot : dataSnapshot.getChildren()) {
-                    String title = songSnapshot.getKey(); // 노래 제목은 키에서 가져옵니다.
-                    if (title != null) {
-                        songList.add(new Song(title, -1));
-                    }
-                }
-
-                // 클리어 여부 가져오기
-                database.child("Users").child(userkey).child("gameprocessivity").child("game3").addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                        if (dataSnapshot.exists()) {
-                            // dataSnapshot이 존재할 때 해당 값을 가져옴
-                            // game3 하위에 저장된 값은 dataSnapshot.getValue()를 통해 가져올 수 있음
-                            Object game3Value = dataSnapshot.getValue();
-                            System.out.println("game3 값: " + game3Value);
-                        } else {
-                            // dataSnapshot이 존재하지 않을 때
-                            System.out.println("game3 값이 존재하지 않습니다.");
-                        }
-                        List<Integer> game3Status = new ArrayList<>();
-                        for (DataSnapshot statusSnapshot : dataSnapshot.getChildren()) {
-                            Integer status = statusSnapshot.getValue(Integer.class);
-                            if (status != null) {
-                                game3Status.add(status);
-                            }
-                        }
-                        System.out.println(game3Status);
-
-                        for (int i = 0; i < game3Status.size(); i++) {
-                            songList.get(i).setCleared(game3Status.get(i));
-                        }
-                        System.out.println(songList);
-
-                        // 노래 목록 기반으로 버튼 생성
-                        createSongButtons(songListContainer, songList);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                        Log.e("SongActivity", "Error fetching game status", databaseError.toException());
-                    }
-                });
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e("SongActivity", "Error fetching songs", databaseError.toException());
-            }
-        });
-    }
-
-    private void createSongButtons(LinearLayout songListContainer, List<Song> songList) {
+        // 노래 목록 기반으로 버튼 생성
         for (int i = 0; i < songList.size(); i++) {
             Song song = songList.get(i);
             Button songButton = new Button(this);
@@ -138,9 +49,9 @@ public class SongActivity extends AppCompatActivity {
             songButton.setTextColor(getResources().getColor(R.color.brown));
 
             // 클리어 여부에 따라 버튼 배경색 설정
-            if (song.getCleared() == 1) {
+            if (song.isCleared() == 1) {
                 songButton.setBackgroundResource(R.drawable.btn_song_cleared);
-            } else if (song.getCleared() == 0) {
+            } else if (song.isCleared() == 0) {
                 songButton.setBackgroundResource(R.drawable.btn_song);
             } else {
                 songButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.lock_resize, 0, 0, 0);
@@ -163,15 +74,27 @@ public class SongActivity extends AppCompatActivity {
             songButton.setLayoutParams(params);
 
             // 버튼 클릭 이벤트 설정
-            songButton.setOnClickListener(v -> {
-                String songTitle = ((Button) v).getText().toString();
-                Intent intent = new Intent(SongActivity.this, EyeTracking.class);
-                intent.putExtra("SONG_TITLE", songTitle);
-                startActivity(intent);
+            int tempI = i+1;
+            songButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //Intent intent = new Intent(SongActivity.this, EyeTracking.class);
+                    Intent intent = new Intent(SongActivity.this, LyricsActivity.class);
+                    intent.putExtra("number", tempI);
+                    startActivity(intent);
+                }
             });
 
             songListContainer.addView(songButton);
         }
+
+        navHome.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent homeIntent = new Intent(SongActivity.this, HomeActivity.class);
+                startActivity(homeIntent);
+            }
+        });
     }
 
     @Override

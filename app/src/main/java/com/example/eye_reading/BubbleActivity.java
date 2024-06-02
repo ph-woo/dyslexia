@@ -167,24 +167,23 @@ public class BubbleActivity extends AppCompatActivity {
 
         images = new ImageView[numBubbles];
 
-        List<int[]> positions = new ArrayList<>();
-        List<Character> bubbleCharacters = new ArrayList<>();
-
-        // Ensure targetChars are included
-        for (char targetChar : targetChars) {
-            bubbleCharacters.add(targetChar);
-        }
-        // Fill remaining bubbles with random characters
-        while (bubbleCharacters.size() < numBubbles) {
-            bubbleCharacters.add(characters[random.nextInt(characters.length)]);
-        }
-
-        // Shuffle the characters
-        java.util.Collections.shuffle(bubbleCharacters);
-
         container.post(() -> {
             int layoutWidth = container.getWidth();
             int layoutHeight = container.getHeight();
+            List<int[]> positions = new ArrayList<>();
+            List<Character> bubbleCharacters = new ArrayList<>();
+
+            // Ensure targetChars are included
+            for (char targetChar : targetChars) {
+                bubbleCharacters.add(targetChar);
+            }
+            // Fill remaining bubbles with random characters
+            while (bubbleCharacters.size() < numBubbles) {
+                bubbleCharacters.add(characters[random.nextInt(characters.length)]);
+            }
+
+            // Shuffle the characters
+            java.util.Collections.shuffle(bubbleCharacters);
 
             for (int i = 0; i < numBubbles; i++) {
                 int leftMargin, topMargin;
@@ -326,7 +325,6 @@ public class BubbleActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         gazeTrackerManager.setGazeTrackerCallbacks(gazeCallback);
-
     }
 
     @Override
@@ -440,14 +438,21 @@ public class BubbleActivity extends AppCompatActivity {
         }
     };
     private void handleGazeEvent(float gazeX, float gazeY) {
+        if (images == null) {
+            Log.e("TAG", "Images array is null");
+            return;
+        }
+
         long currentTime = System.currentTimeMillis();
         for (ImageView imageView : images) {
+            if (imageView == null) continue;
+
             int[] location = new int[2];
             imageView.getLocationOnScreen(location);
             float x = location[0] ; //POINT_RADIUS
             float y = location[1] ;
-            float width = imageView.getWidth() + 40;
-            float height = imageView.getHeight() + 40;
+            float width = imageView.getWidth() + 45;
+            float height = imageView.getHeight() + 45;
 
             // 시선이 특정 imageView 위에 있는지 확인
             if (gazeX >= x && gazeX <= x + width && gazeY >= y && gazeY <= y + height) {
