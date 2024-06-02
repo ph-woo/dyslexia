@@ -90,7 +90,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_below="@id/current_character_info"
-        android:layout_above="@id/navigation_bar"
+        android:layout_alignParentBottom="true"
         android:paddingTop="10dp"
         android:paddingHorizontal="20dp">
 
@@ -101,12 +101,4 @@
             android:orientation="vertical">
         </LinearLayout>
     </ScrollView>
-
-    <include
-        android:id="@+id/navigation_bar"
-        layout="@layout/nav_bar"
-        android:layout_width="match_parent"
-        android:layout_height="90dp"
-        android:layout_alignParentBottom="true" />
-
 </RelativeLayout>
