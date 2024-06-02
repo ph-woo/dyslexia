@@ -2,5 +2,5 @@
     <item
         android:width="40dp"
         android:height="40dp"
-        android:drawable="@drawable/lock" />
+        android:drawable="@drawable/clear" />
 </layer-list>

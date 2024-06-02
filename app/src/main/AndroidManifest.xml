@@ -13,9 +13,12 @@
         android:theme="@style/AppTheme.Splash"
         tools:targetApi="31">
 
+
         <activity
-            android:name=".MainActivity"
-            android:exported="true">
+            android:name=".LoginActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Eye_reading">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -24,6 +27,7 @@
 
         <activity
             android:name=".IdcreateActivity"
+            android:theme="@style/Theme.Eye_reading"
             android:exported="true" />
 
         <activity

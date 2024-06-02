@@ -87,6 +87,7 @@ public class EyeTracking extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_eye);
+      
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
@@ -916,7 +917,7 @@ public class EyeTracking extends AppCompatActivity {
       Intent intent = new Intent(getApplicationContext(), LyricsActivity.class);
       startActivity(intent);
     }
-
+  
     private void speakOut(String text) {
         tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
     }

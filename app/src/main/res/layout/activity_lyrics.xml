@@ -89,7 +89,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center"
-            android:padding="16dp" />
+            android:padding="13dp" />
 
         <LinearLayout
             android:id="@+id/buttonsLayout2"
@@ -98,7 +98,7 @@
             android:layout_below="@+id/buttonsLayout1"
             android:orientation="horizontal"
             android:gravity="center"
-            android:padding="16dp" />
+            android:padding="13dp" />
 
         <LinearLayout
             android:id="@+id/buttonsLayout3"
@@ -107,7 +107,7 @@
             android:layout_below="@+id/buttonsLayout2"
             android:orientation="horizontal"
             android:gravity="center"
-            android:padding="16dp" />
+            android:padding="13dp" />
 
         <LinearLayout
             android:id="@+id/buttonsLayout4"
@@ -116,7 +116,7 @@
             android:layout_below="@+id/buttonsLayout3"
             android:orientation="horizontal"
             android:gravity="center"
-            android:padding="16dp" />
+            android:padding="13dp" />
 
         <LinearLayout
             android:id="@+id/buttonsLayout5"
@@ -125,7 +125,7 @@
             android:layout_below="@+id/buttonsLayout4"
             android:orientation="horizontal"
             android:gravity="center"
-            android:padding="16dp" />
+            android:padding="13dp" />
 
         <LinearLayout
             android:id="@+id/buttonsLayout6"
@@ -134,7 +134,26 @@
             android:layout_below="@+id/buttonsLayout5"
             android:orientation="horizontal"
             android:gravity="center"
-            android:padding="16dp" />
+            android:padding="13dp" />
+
+        <LinearLayout
+            android:id="@+id/buttonsLayout7"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/buttonsLayout6"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:padding="13dp" />
+
+        <LinearLayout
+            android:id="@+id/buttonsLayout8"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/buttonsLayout7"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:padding="13dp" />
+
 
         <!-- Repeat LinearLayouts for additional rows -->
 
