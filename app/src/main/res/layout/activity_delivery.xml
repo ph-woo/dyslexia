@@ -4,6 +4,7 @@
     android:background="@color/background_color"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:keepScreenOn="true"
     tools:context=".DeliveryActivity">
 
     <RelativeLayout
@@ -84,7 +85,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="30dp"
-                android:text="단어"
+                android:text=""
                 android:textColor="@android:color/black"
                 android:textSize="30sp" />
         </RelativeLayout>
@@ -108,7 +109,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="30dp"
-                android:text="단어"
+                android:text=""
                 android:textColor="@android:color/black"
                 android:textSize="30sp" />
         </RelativeLayout>
@@ -133,7 +134,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="30dp"
-                android:text="단어"
+                android:text=""
                 android:textColor="@android:color/black"
                 android:textSize="30sp" />
         </RelativeLayout>

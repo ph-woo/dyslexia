@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        gazeTrackerManager.removeCameraPreview(preview);
+        //gazeTrackerManager.removeCameraPreview(preview);
 
         gazeTrackerManager.removeCallbacks(gazeCallback, calibrationCallback, statusCallback, userStatusCallback);
         Log.i(TAG, "onStop");

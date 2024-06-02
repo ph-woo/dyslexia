@@ -35,7 +35,7 @@
                 android:id="@+id/bookmark_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="00"
+                android:text=""
                 android:textSize="30sp"
                 android:textColor="@android:color/black"
                 android:layout_marginStart="8dp" />
@@ -61,22 +61,22 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
         android:layout_below="@id/nickname"
-        android:src="@drawable/dog" />
+        android:src="@drawable/character_dog" />
 
     <!-- '캐릭터 사러가기' 버튼 -->
     <Button
         android:id="@+id/btn_shop"
         android:layout_width="300dp"
-        android:layout_height="60dp"
+        android:layout_height="70dp"
         android:layout_centerHorizontal="true"
         android:layout_below="@id/character"
         android:layout_marginTop="20dp"
         android:text="캐릭터 사러가기"
-        android:textSize="24sp"
+        android:textSize="28sp"
         android:textColor="@color/brown"
         android:paddingLeft="30dp"
         android:drawableLeft="@drawable/shop_resize"
-        android:background="@drawable/btn_shop" />
+        android:background="@drawable/rounded_basic" />
 
         <include
             android:id="@+id/navigation_bar"

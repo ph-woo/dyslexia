@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "572257351834",
+    "firebase_url": "https://song-62299-default-rtdb.firebaseio.com",
+    "project_id": "song-62299",
+    "storage_bucket": "song-62299.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:572257351834:android:e2db36d04d25a42833c723",
+        "android_client_info": {
+          "package_name": "com.example.eye_reading"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApTu398CEfB1W4ujLp2E7kihfwR2JItjg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

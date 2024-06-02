@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.eye_reading">
-
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -37,7 +36,17 @@
             android:exported="true" />
 
         <activity
+            android:name=".EyeTracking"
+            android:theme="@style/Theme.Eye_reading"
+            android:exported="true" />
+          
+        <activity
             android:name=".GameActivity"
+            android:theme="@style/Theme.Eye_reading"
+            android:exported="true" />
+
+        <activity
+            android:name=".ShopActivity"
             android:theme="@style/Theme.Eye_reading"
             android:exported="true" />
 
@@ -53,11 +62,6 @@
 
         <activity
             android:name=".SongActivity"
-            android:theme="@style/Theme.Eye_reading"
-            android:exported="true" />
-
-        <activity
-            android:name=".EyeTracking"
             android:theme="@style/Theme.Eye_reading"
             android:exported="true" />
 

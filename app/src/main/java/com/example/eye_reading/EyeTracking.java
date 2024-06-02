@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.provider.Settings;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
@@ -26,6 +27,7 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.ContextCompat;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import camp.visual.gazetracker.GazeTracker;
@@ -54,11 +56,6 @@ import visual.camp.sample.view.EyeBlinkView;
 import visual.camp.sample.view.PointView;
 
 public class EyeTracking extends AppCompatActivity {
-
-    String songTitle = null; // 변수를 먼저 선언하고 초기화
-    String nickname= null; // 변수를 먼저 선언하고 초기화
-    String userkey = null; // 변수를 먼저 선언하고 초기화
-
     private static final String TAG = EyeTracking.class.getSimpleName();
     private static final String[] PERMISSIONS = new String[]{
             Manifest.permission.CAMERA // 시선 추적 input
@@ -78,6 +75,7 @@ public class EyeTracking extends AppCompatActivity {
     private long btnStopCalibrationStartTime = 0;
     private long btnSetCalibrationStartTime = 0;
     private long btnGuiDemoStartTime = 0;
+    private TextToSpeech tts;
 
     ////////private static final long GAZE_HOLD_DURATION = 1000; // 2초       2000
                                                         // 1초       1000
@@ -87,48 +85,16 @@ public class EyeTracking extends AppCompatActivity {
     private Map<Button, Long> gazeStartTimeMap = new HashMap<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-
-
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_eye);
-
-
-
-
-        Intent intent = getIntent();
-        if (intent != null && intent.hasExtra("SONG_TITLE")) {
-            songTitle = intent.getStringExtra("SONG_TITLE");
-            // songTitle을 사용하여 작업 수행
-            Log.d("EyeTracking", "Received song title: " + songTitle);
-        } else {
-            Log.e("EyeTracking", "No song title provided");
-        }
-
-        if (intent != null && intent.hasExtra("USERNAME")) {
-            nickname = intent.getStringExtra("USERNAME");
-            // songTitle을 사용하여 작업 수행
-            Log.d("EyeTracking", "Received USERNAME: " + nickname);
-        } else {
-            Log.e("EyeTracking", "No USERNAME provided");
-        }
-
-        if (intent != null && intent.hasExtra("USERKEY")) {
-           userkey = intent.getStringExtra("USERKEY");
-            // songTitle을 사용하여 작업 수행
-            Log.d("EyeTracking", "Received USERKEY: " + userkey);
-        } else {
-            Log.e("EyeTracking", "No USERKEY provided");
-        }
-
-
-
+      
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
         gazeTrackerManager = GazeTrackerManager.makeNewInstance(this);
         Log.i(TAG, "gazeTracker version: " + GazeTracker.getVersionName());
+
+        tts = new TextToSpeech(this, status -> {});
 
         initView();
         checkPermission();
@@ -928,30 +894,31 @@ public class EyeTracking extends AppCompatActivity {
       LoadCalibrationResult result = gazeTrackerManager.loadCalibrationData();
       switch (result) {
         case SUCCESS:
-          showToast("setCalibrationData success", false);
+          speakOut("빨간 점을 바라보세요");
+          showToast("빨간 점을 바라보세요", false);//showToast("setCalibrationData success", false);
           break;
         case FAIL_DOING_CALIBRATION:
-          showToast("calibrating", false);
+          speakOut("빨간 점을 바라보세요");
+          showToast("빨간 점을 바라보세요", false);//showToast("calibrating", false);
           break;
         case FAIL_NO_CALIBRATION_DATA:
-          showToast("Calibration data is null", true);
+          speakOut("빨간 점을 바라보세요");
+          showToast("빨간 점을 바라보세요", true);// showToast("Calibration data is null", true);
           break;
         case FAIL_HAS_NO_TRACKER:
-          showToast("No tracker has initialized", true);
+          speakOut("다시 시도하세요");
+          showToast("다시 시도하세요", true);//showToast("No tracker has initialized", true);
           break;
       }
       setViewAtGazeTrackerState();
     }
 
-
-
     private void showGuiDemo() {
-
-System.out.println(songTitle);
-        Intent doubleintent = new Intent(getApplicationContext(), LyricsActivity.class);
-        doubleintent.putExtra("SONG_TITLE", songTitle);
-        doubleintent.putExtra("USERNAME", nickname);
-        doubleintent.putExtra("USERKEY", userkey);
-        startActivity(doubleintent);
+      Intent intent = new Intent(getApplicationContext(), LyricsActivity.class);
+      startActivity(intent);
+    }
+  
+    private void speakOut(String text) {
+        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
     }
 }
