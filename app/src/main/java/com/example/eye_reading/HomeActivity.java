@@ -35,43 +35,43 @@ public class HomeActivity extends AppCompatActivity {
 
 //
 //         SharedPreferences에서 회원가입 정보를 불러옴
-        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-        nickname = sharedPreferences.getString("username", null);
-        userkey = sharedPreferences.getString("userkey", null);
-
-        if (nickname == null || nickname.isEmpty()) {
-            Log.e("HomeAct", "No nickname found in SharedPreferences");
-            // 사용자에게 알림 또는 다시 로그인 화면으로 이동
-            Toast.makeText(this, "No nickname found, please log in again.", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(HomeActivity.this, IdcreateActivity.class);
-            startActivity(intent);
-            finish();
-            return;
-        } else {
-            Log.d("HomeAct", "Loaded nickname from SharedPreferences: " + nickname);
-        }
-
-        if (userkey == null || userkey.isEmpty()) {
-            Log.e("HomeAct", "No userkey found in SharedPreferences");
-            // 사용자에게 알림 또는 다시 로그인 화면으로 이동
-            Toast.makeText(this, "No user key found, please log in again.", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(HomeActivity.this, IdcreateActivity.class);
-            startActivity(intent);
-            finish();
-            return;
-        } else {
-            Log.d("HomeAct", "Loaded userkey from SharedPreferences: " + userkey);
-        }
+//        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+//        nickname = sharedPreferences.getString("username", null);
+//        userkey = sharedPreferences.getString("userkey", null);
+//
+//        if (nickname == null || nickname.isEmpty()) {
+//            Log.e("HomeAct", "No nickname found in SharedPreferences");
+//            // 사용자에게 알림 또는 다시 로그인 화면으로 이동
+//            Toast.makeText(this, "No nickname found, please log in again.", Toast.LENGTH_SHORT).show();
+//            Intent intent = new Intent(HomeActivity.this, IdcreateActivity.class);
+//            startActivity(intent);
+//            finish();
+//            return;
+//        } else {
+//            Log.d("HomeAct", "Loaded nickname from SharedPreferences: " + nickname);
+//        }
+//
+//        if (userkey == null || userkey.isEmpty()) {
+//            Log.e("HomeAct", "No userkey found in SharedPreferences");
+//            // 사용자에게 알림 또는 다시 로그인 화면으로 이동
+//            Toast.makeText(this, "No user key found, please log in again.", Toast.LENGTH_SHORT).show();
+//            Intent intent = new Intent(HomeActivity.this, IdcreateActivity.class);
+//            startActivity(intent);
+//            finish();
+//            return;
+//        } else {
+//            Log.d("HomeAct", "Loaded userkey from SharedPreferences: " + userkey);
+//        }
 
 
 
         Intent gameIntent = getIntent();
-        if (gameIntent != null && gameIntent.hasExtra("USERNAME")) {
-            nickname = gameIntent.getStringExtra("USERNAME");
-            Log.d("HomeAct", "Received nickname: " + nickname);
-        } else {
-            Log.e("HomeAct", "No nickname provided");
-        }
+//        if (gameIntent != null && gameIntent.hasExtra("USERNAME")) {
+//            nickname = gameIntent.getStringExtra("USERNAME");
+//            Log.d("HomeAct", "Received nickname: " + nickname);
+//        } else {
+//            Log.e("HomeAct", "No nickname provided");
+//        }
 
         if (gameIntent != null && gameIntent.hasExtra("USERKEY")) {
             userkey = gameIntent.getStringExtra("USERKEY");
@@ -79,6 +79,14 @@ public class HomeActivity extends AppCompatActivity {
         } else {
             Log.e("HomeAct", "No userkey provided");
         }
+
+        fetchUsername(userkey);
+
+
+
+
+
+
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
@@ -122,6 +130,29 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
     }
+
+
+
+    private void fetchUsername(String userkey) {
+        databaseReference.child("Users").child(userkey).child("username").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    nickname = snapshot.getValue().toString();
+                    Log.d("HomeAct", "Received username from database: " + nickname);
+                    nicknameText.setText(nickname);
+                } else {
+                    Toast.makeText(HomeActivity.this, "username not found", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("HomeAct", "Database error: " + error.getMessage());
+            }
+        });
+    }
+
 
     private void loadBookmarkCount() {
         if (userkey.isEmpty()) {

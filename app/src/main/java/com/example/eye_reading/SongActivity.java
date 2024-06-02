@@ -46,6 +46,22 @@ public class SongActivity extends AppCompatActivity {
             Log.e("HomeAct", "No userkey provided");
         }
 
+//        Intent intent = getIntent();
+//        if (intent != null && intent.hasExtra("USERNAME")) {
+//            nickname = intent.getStringExtra("USERNAME");
+//            Log.d("HomeAct", "Received nickname: " + nickname);
+//        } else {
+//            Log.e("HomeAct", "No nickname provided");
+//        }
+//
+//        if (intent != null && intent.hasExtra("USERKEY")) {
+//            userkey = gameIntent.getStringExtra("USERKEY");
+//            Log.d("HomeAct", "Received userkey: " + userkey);
+//        } else {
+//            Log.e("HomeAct", "No userkey provided");
+//        }
+
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
@@ -63,6 +79,8 @@ public class SongActivity extends AppCompatActivity {
 
         navHome.setOnClickListener(v -> {
             Intent homeIntent = new Intent(SongActivity.this, HomeActivity.class);
+            homeIntent.putExtra("USERNAME", nickname);
+            homeIntent.putExtra("USERKEY", userkey);
             startActivity(homeIntent);
         });
     }
@@ -72,7 +90,7 @@ public class SongActivity extends AppCompatActivity {
         LinearLayout songListContainer = findViewById(R.id.song_list);
 
         // 노래 목록 가져오기
-        database.child("songs").addListenerForSingleValueEvent(new ValueEventListener() {
+        database.child("songs").child("songs").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot songSnapshot : dataSnapshot.getChildren()) {
@@ -83,7 +101,7 @@ public class SongActivity extends AppCompatActivity {
                 }
 
                 // 클리어 여부 가져오기
-                database.child("Users").child(userkey).child("gameprocessivity").child("game3").addListenerForSingleValueEvent(new ValueEventListener() {
+                database.child("Users").child(userkey).child("game3").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
@@ -105,7 +123,11 @@ public class SongActivity extends AppCompatActivity {
                         }
                         System.out.println(game3Status);
 
-                        for (int i = 0; i < game3Status.size(); i++) {
+                        // songList와 game3Status 크기 비교
+                        int minSize = Math.min(songList.size(), game3Status.size());
+
+                        // songList와 game3Status의 크기를 초과하지 않도록 설정
+                        for (int i = 0; i < minSize; i++) {
                             songList.get(i).setCleared(game3Status.get(i));
                         }
                         System.out.println(songList);
@@ -128,6 +150,7 @@ public class SongActivity extends AppCompatActivity {
         });
     }
 
+
     private void createSongButtons(LinearLayout songListContainer, List<Song> songList) {
         for (int i = 0; i < songList.size(); i++) {
             Song song = songList.get(i);
@@ -138,14 +161,12 @@ public class SongActivity extends AppCompatActivity {
             songButton.setTextColor(getResources().getColor(R.color.brown));
 
             // 클리어 여부에 따라 버튼 배경색 설정
-            if (song.getCleared() == 1) {
-                songButton.setBackgroundResource(R.drawable.btn_song_cleared);
-            } else if (song.getCleared() == 0) {
+            if (song.getCleared() == 0) {
                 songButton.setBackgroundResource(R.drawable.btn_song);
-            } else {
+            } else if (song.getCleared() == 1) {
+                songButton.setBackgroundResource(R.drawable.btn_song_cleared);
                 songButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.lock_resize, 0, 0, 0);
                 songButton.setCompoundDrawablePadding(20);
-                songButton.setBackgroundResource(R.drawable.btn_song_locked);
             }
 
             // 버튼 ID 설정
@@ -167,6 +188,8 @@ public class SongActivity extends AppCompatActivity {
                 String songTitle = ((Button) v).getText().toString();
                 Intent intent = new Intent(SongActivity.this, EyeTracking.class);
                 intent.putExtra("SONG_TITLE", songTitle);
+                intent.putExtra("USERNAME", nickname);
+                intent.putExtra("USERKEY", userkey);
                 startActivity(intent);
             });
 

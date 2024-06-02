@@ -56,6 +56,8 @@ import visual.camp.sample.view.PointView;
 public class EyeTracking extends AppCompatActivity {
 
     String songTitle = null; // 변수를 먼저 선언하고 초기화
+    String nickname= null; // 변수를 먼저 선언하고 초기화
+    String userkey = null; // 변수를 먼저 선언하고 초기화
 
     private static final String TAG = EyeTracking.class.getSimpleName();
     private static final String[] PERMISSIONS = new String[]{
@@ -103,6 +105,24 @@ public class EyeTracking extends AppCompatActivity {
         } else {
             Log.e("EyeTracking", "No song title provided");
         }
+
+        if (intent != null && intent.hasExtra("USERNAME")) {
+            nickname = intent.getStringExtra("USERNAME");
+            // songTitle을 사용하여 작업 수행
+            Log.d("EyeTracking", "Received USERNAME: " + nickname);
+        } else {
+            Log.e("EyeTracking", "No USERNAME provided");
+        }
+
+        if (intent != null && intent.hasExtra("USERKEY")) {
+           userkey = intent.getStringExtra("USERKEY");
+            // songTitle을 사용하여 작업 수행
+            Log.d("EyeTracking", "Received USERKEY: " + userkey);
+        } else {
+            Log.e("EyeTracking", "No USERKEY provided");
+        }
+
+
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
@@ -930,6 +950,8 @@ public class EyeTracking extends AppCompatActivity {
 System.out.println(songTitle);
         Intent doubleintent = new Intent(getApplicationContext(), LyricsActivity.class);
         doubleintent.putExtra("SONG_TITLE", songTitle);
+        doubleintent.putExtra("USERNAME", nickname);
+        doubleintent.putExtra("USERKEY", userkey);
         startActivity(doubleintent);
     }
 }
