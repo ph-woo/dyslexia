@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,17 +28,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import com.example.eye_reading.GazeTrackerManager;
-import com.example.eye_reading.R;
-
-import camp.visual.gazetracker.callback.GazeCallback;
-import camp.visual.gazetracker.gaze.GazeInfo;
 import camp.visual.gazetracker.GazeTracker;
+import camp.visual.gazetracker.callback.GazeCallback;
 import camp.visual.gazetracker.filter.OneEuroFilterManager;
-import camp.visual.gazetracker.util.ViewLayoutChecker;
+import camp.visual.gazetracker.gaze.GazeInfo;
 import camp.visual.gazetracker.state.EyeMovementState;
+import camp.visual.gazetracker.util.ViewLayoutChecker;
 import visual.camp.sample.view.GazePathView;
-import android.widget.ImageView;
 
 public class LyricsActivity extends AppCompatActivity {
 
@@ -59,7 +56,7 @@ public class LyricsActivity extends AppCompatActivity {
     private int lives = 3; // 목숨의 개수
     private List<ImageView> heartImages;
 
-    private static final long GAZE_HOLD_DURATION = 650; // 0.65초
+    private static final long GAZE_HOLD_DURATION = 850; // 0.85초로 수정했습니다.
 
     /////// 각 버튼에 대한 시선 시작 시간을 저장하는 맵을 생성합니다.
     private Map<TextView, Long> gazeStartTimeMap = new HashMap<>();

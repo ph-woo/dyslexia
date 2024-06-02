@@ -1,6 +1,8 @@
 package com.example.eye_reading;
 
+import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,10 +14,15 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ShopActivity extends AppCompatActivity {
     private LinearLayout characterContainer;
+    private Set<String> ownedCharacters;
+    private String selectedCharacter;
+    private int bookmarks = 15;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +48,10 @@ public class ShopActivity extends AppCompatActivity {
         });
 
         characterContainer = findViewById(R.id.character_list);
+        selectedCharacter = "강아지";
+        ownedCharacters = new HashSet<>();
+        ownedCharacters.add("강아지");
+        ownedCharacters.add("판다");
         addCharacterItems();
     }
 
@@ -61,8 +72,59 @@ public class ShopActivity extends AppCompatActivity {
             characterDescription.setText(character.getDescription());
             characterPrice.setText(String.valueOf(character.getPrice()));
 
+            if (ownedCharacters.contains(character.getName())) {
+                characterLayout.setBackgroundColor(selectedCharacter != null && selectedCharacter.equals(character.getName()) ?
+                        Color.BLUE : Color.GREEN);
+                characterLayout.setOnClickListener(v -> {
+                    if (!character.getName().equals(selectedCharacter)) {
+                        showEquipDialog(character.getName());
+                    }
+                });
+            } else {
+                characterLayout.setOnClickListener(v -> {
+                    if (bookmarks >= character.getPrice()) {
+                        showPurchaseDialog(character);
+                    } else {
+                        showInsufficientBookmarksDialog();
+                    }
+                });
+            }
+
             characterContainer.addView(characterLayout);
         }
+    }
+
+    private void showEquipDialog(String characterName) {
+        new AlertDialog.Builder(this)
+                .setTitle("캐릭터 장착")
+                .setMessage("이 캐릭터를 장착하시겠습니까?")
+                .setPositiveButton("장착하기", (dialog, which) -> {
+                    selectedCharacter = characterName;
+                    addCharacterItems();
+                })
+                .setNegativeButton("창 닫기", null)
+                .show();
+    }
+
+    private void showPurchaseDialog(Character character) {
+        new AlertDialog.Builder(this)
+                .setTitle("캐릭터 구매")
+                .setMessage("이 캐릭터를 구매하시겠습니까?")
+                .setPositiveButton("구매하기", (dialog, which) -> {
+                    bookmarks -= character.getPrice();
+                    ownedCharacters.add(character.getName());
+                    addCharacterItems();
+                })
+                .setNegativeButton("창 닫기", null)
+                .show();
+    }
+
+    private void showInsufficientBookmarksDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("책갈피 부족")
+                .setMessage("책갈피가 부족해요.")
+                .setPositiveButton("확인", null)
+                .show();
     }
 
     private List<Character> getCharacters() {

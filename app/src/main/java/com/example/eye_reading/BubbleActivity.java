@@ -7,6 +7,9 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -24,12 +27,26 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import camp.visual.gazetracker.callback.GazeCallback;
+import camp.visual.gazetracker.gaze.GazeInfo;
+import camp.visual.gazetracker.state.EyeMovementState;
+import camp.visual.gazetracker.util.ViewLayoutChecker;
+import camp.visual.gazetracker.filter.OneEuroFilterManager;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Random;
 
+
+import camp.visual.gazetracker.util.ViewLayoutChecker;
+import visual.camp.sample.view.GazePathView;
+
 public class BubbleActivity extends AppCompatActivity {
+    private DatabaseReference databaseReference;
+    String userKey;
     private List<WordCharacterPair> wordList;
     private String targetWord;
     private char[] targetChars;
@@ -39,190 +56,44 @@ public class BubbleActivity extends AppCompatActivity {
     private TextToSpeech tts;
     private List<ImageView> heartImages;
 
-    String nickname="";
+    private GazePathView gazePathView;
+    private GazeTrackerManager gazeTrackerManager;
+    private final ViewLayoutChecker viewLayoutChecker = new ViewLayoutChecker();
 
-    String userkey="";
+    private final OneEuroFilterManager oneEuroFilterManager = new OneEuroFilterManager(
+            2, 30, 0.5F, 0.001F, 1.0F);
 
-    int index = 0;
+    private Map<ImageView, Long> gazeStartTimeMap = new HashMap<>();
+    private static final long GAZE_HOLD_DURATION = 700; // 0.7초
+
+    private ImageView[] images;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bubble);
-
-        databaseReference = FirebaseDatabase.getInstance("https://song-62299-default-rtdb.firebaseio.com/").getReference();
-
-        Intent bubbleIntent = getIntent();
-        if (bubbleIntent != null && bubbleIntent.hasExtra("USERNAME")) {
-            nickname= bubbleIntent.getStringExtra("USERNAME");
-
-            Log.d("HomeAct", "Received nickname: " + nickname);
-        } else {
-            Log.e("HomeAct", "No nickname provided");
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("");
         }
 
+        Intent bubbleIntent = getIntent();
+
         if (bubbleIntent != null && bubbleIntent.hasExtra("USERKEY")) {
-            userkey= bubbleIntent.getStringExtra("USERKEY");
+            userKey = bubbleIntent.getStringExtra("USERKEY");
 
-//             Log.d("HomeAct", "Received userkey: " + userkey);
-//         } else {
-//             Log.e("HomeAct", "No userkey provided");
-//         }
+            Log.d("HomeAct", "Received userkey: " + userKey);
+        } else {
+            Log.e("HomeAct", "No userkey provided");
+        }
 
-//         orderingData(userkey);
+        tts = new TextToSpeech(this, status -> {
+            if (status != TextToSpeech.ERROR) {
+                tts.setLanguage(Locale.KOREAN);
+                speakOut(targetWord);
+            }
+        });
 
-
-
-//     }
-
-//         private void initializeGame() {
-
-//             if (getSupportActionBar() != null) {
-//                 getSupportActionBar().setTitle("");
-//             }
-
-//             tts = new TextToSpeech(this, status -> {
-//                 if (status != TextToSpeech.ERROR) {
-//                     tts.setLanguage(Locale.KOREAN);
-//                     speakOut(targetWord);
-//                 }
-//             });
-
-//             ImageView btnBack = findViewById(R.id.btn_back);
-//             btnBack.setOnClickListener(v -> onBackPressed());
-
-//             RelativeLayout container = findViewById(R.id.container);
-//             int numBubbles = 15;
-//             int bubbleSize = 80; // in dp
-//             int minDistance = 100; // in dp, minimum distance between bubbles
-
-//             // Convert dp to pixels
-//             final float scale = getResources().getDisplayMetrics().density;
-//             int bubbleSizeInPx = (int) (bubbleSize * scale + 0.5f);
-//             int minDistanceInPx = (int) (minDistance * scale + 0.5f);
-
-//             // List of characters to include in bubbles
-//             char[] characters = {'ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ',
-//                     'ㅏ', 'ㅑ', 'ㅓ', 'ㅕ', 'ㅗ', 'ㅛ', 'ㅜ', 'ㅠ', 'ㅡ', 'ㅣ'};
-//             Random random = new Random();
-
-//             heartImages = new ArrayList<>();
-//             heartImages.add(findViewById(R.id.heart1));
-//             heartImages.add(findViewById(R.id.heart2));
-//             heartImages.add(findViewById(R.id.heart3));
-
-//             ImageView soundButton = findViewById(R.id.sound);
-//             soundButton.setOnClickListener(v -> speakOut(targetWord));
-
-//             // Wait until layout is drawn to get the correct width and height
-//             container.post(() -> {
-//                 int layoutWidth = container.getWidth();
-//                 int layoutHeight = container.getHeight();
-//                 List<int[]> positions = new ArrayList<>();
-//                 List<Character> bubbleCharacters = new ArrayList<>();
-
-//                 // Ensure targetChars are included
-//                 for (char targetChar : targetChars) {
-//                     bubbleCharacters.add(targetChar);
-//                 }
-//                 // Fill remaining bubbles with random characters
-//                 while (bubbleCharacters.size() < numBubbles) {
-//                     bubbleCharacters.add(characters[random.nextInt(characters.length)]);
-//                 }
-
-//                 // Shuffle the characters
-//                 java.util.Collections.shuffle(bubbleCharacters);
-
-//                 for (int i = 0; i < numBubbles; i++) {
-//                     int leftMargin, topMargin;
-//                     boolean overlaps;
-
-//                     // Find a non-overlapping position with minimum distance
-//                     do {
-//                         overlaps = false;
-//                         leftMargin = random.nextInt(layoutWidth - bubbleSizeInPx);
-//                         topMargin = random.nextInt(layoutHeight - bubbleSizeInPx);
-
-//                         for (int[] pos : positions) {
-//                             int otherLeft = pos[0];
-//                             int otherTop = pos[1];
-//                             double distance = Math.sqrt(Math.pow(leftMargin - otherLeft, 2) + Math.pow(topMargin - otherTop, 2));
-//                             if (distance < minDistanceInPx) {
-//                                 overlaps = true;
-//                                 break;
-//                             }
-//                         }
-//                     } while (overlaps);
-
-//                     positions.add(new int[]{leftMargin, topMargin});
-
-//                     // Create ImageView for the bubble
-//                     ImageView bubble = new ImageView(BubbleActivity.this);
-//                     Drawable bubbleDrawable = ContextCompat.getDrawable(BubbleActivity.this, R.drawable.bubble);
-//                     bubble.setImageDrawable(bubbleDrawable);
-
-//                     RelativeLayout.LayoutParams bubbleParams = new RelativeLayout.LayoutParams(bubbleSizeInPx, bubbleSizeInPx);
-//                     bubbleParams.leftMargin = leftMargin;
-//                     bubbleParams.topMargin = topMargin;
-
-//                     container.addView(bubble, bubbleParams);
-
-//                     // Create TextView for the character
-//                     TextView textView = new TextView(BubbleActivity.this);
-//                     textView.setTextSize(54);
-//                     textView.setTextColor(Color.BLACK);
-//                     textView.setText(String.valueOf(bubbleCharacters.get(i)));
-//                     textView.setGravity(android.view.Gravity.CENTER);
-
-//                     RelativeLayout.LayoutParams textParams = new RelativeLayout.LayoutParams(bubbleSizeInPx, bubbleSizeInPx);
-//                     textParams.leftMargin = leftMargin;
-//                     textParams.topMargin = topMargin;
-
-//                     container.addView(textView, textParams);
-
-//                     // Set click listener for the bubble
-//                     final int index = i;
-//                     bubble.setOnClickListener(v -> handleBubbleClick(textView, bubbleCharacters.get(index)));
-//                 }
-//             });
-
-
-
-
-
-//         }
-
-//     // orderingData() 메소드 구현
-//     public void orderingData(String userKey) {
-//         databaseReference.child("Users").child(userKey).child("gameprocessivity").child("game1")
-//                 .addListenerForSingleValueEvent(new ValueEventListener() {
-//                     @Override
-//                     public void onDataChange(DataSnapshot dataSnapshot) {
-//                         if (dataSnapshot.exists()) {
-//                             // game1 배열 데이터 가져오기
-//                             List<Long> game1Array = (List<Long>) dataSnapshot.getValue();
-//                             if (game1Array != null && gameIndex < game1Array.size()) {
-//                                 for (int index = 0; index < game1Array.size(); index++) {
-//                                     long value = game1Array.get(index);
-//                                     // 값이 0이면 해당 인덱스를 출력하고 함수 종료
-//                                     if (value == 0) {
-//                                         System.out.println("처음으로 0이 발견된 인덱스: " + index);
-//                                         gameIndex = index;
-//                                         try {
-//                                             fetchData();
-//                                         } catch (Exception e) {
-//                                             Log.e(TAG, "Error in fetchSongData: ", e);
-//                                         }
-//                                         return; // 함수 종료
-//                                     }
-//                                 }
-//                                 // 0이 발견되지 않았을 경우 메시지 출력
-//                                 System.out.println("배열에서 0이 발견되지 않았습니다.");
-//                             } else {
-//                                 System.out.println("game1 배열이 비어있습니다.");
-//                             }
-//                         } else {
-//                             System.out.println("game1 배열이 존재하지 않습니다.");
         ImageView btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> onBackPressed());
 
@@ -230,34 +101,47 @@ public class BubbleActivity extends AppCompatActivity {
         heartImages.add(findViewById(R.id.heart1));
         heartImages.add(findViewById(R.id.heart2));
         heartImages.add(findViewById(R.id.heart3));
+        gazePathView = findViewById(R.id.gazePathView);
 
         ImageView soundButton = findViewById(R.id.sound);
         soundButton.setOnClickListener(v -> speakOut(targetWord));
 
-        initWordList();
-        startNewGame();
+        gazeTrackerManager = GazeTrackerManager.getInstance();
+
+        databaseReference = FirebaseDatabase.getInstance("https://song-62299-default-rtdb.firebaseio.com/").getReference();
+        fetchData();
     }
 
-    private void initWordList() {
+    private void fetchData() {
         wordList = new ArrayList<>();
-        wordList.add(new WordCharacterPair("자동차", new char[]{'ㅈ', 'ㅏ', 'ㄷ', 'ㅗ', 'ㅇ', 'ㅊ', 'ㅏ'}));
-        wordList.add(new WordCharacterPair("강아지", new char[]{'ㄱ', 'ㅏ', 'ㅇ', 'ㅇ', 'ㅏ', 'ㅈ', 'ㅣ'}));
-        wordList.add(new WordCharacterPair("고양이", new char[]{'ㄱ', 'ㅗ', 'ㅇ', 'ㅑ', 'ㅇ', 'ㅇ', 'ㅣ'}));
-        wordList.add(new WordCharacterPair("지우개", new char[]{'ㅈ', 'ㅣ', 'ㅇ', 'ㅜ', 'ㄱ', 'ㅐ'}));
-        wordList.add(new WordCharacterPair("색연필", new char[]{'ㅅ', 'ㅐ', 'ㄱ', 'ㅇ', 'ㅕ', 'ㄴ', 'ㅍ', 'ㅣ', 'ㄹ'}));
-        wordList.add(new WordCharacterPair("지하철", new char[]{'ㅈ', 'ㅣ', 'ㅎ', 'ㅏ', 'ㅊ', 'ㅓ', 'ㄹ'}));
-        wordList.add(new WordCharacterPair("개나리", new char[]{'ㄱ', 'ㅐ', 'ㄴ', 'ㅏ', 'ㄹ', 'ㅣ'}));
-        wordList.add(new WordCharacterPair("비행기", new char[]{'ㅂ', 'ㅣ', 'ㅎ', 'ㅐ', 'ㅇ', 'ㄱ', 'ㅣ'}));
-        wordList.add(new WordCharacterPair("피아노", new char[]{'ㅍ', 'ㅣ', 'ㅇ', 'ㅏ', 'ㄴ', 'ㅗ'}));
-        wordList.add(new WordCharacterPair("선생님", new char[]{'ㅅ', 'ㅓ', 'ㄴ', 'ㅅ', 'ㅐ', 'ㅇ', 'ㄴ', 'ㅣ', 'ㅁ'}));
-        // 단어 추가
+        databaseReference.child("bubbleWords").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    WordCharacterPair pair = dataSnapshot.getValue(WordCharacterPair.class);
+                    if (pair != null) {
+                        wordList.add(pair);
+                    }
+                }
+                startNewGame();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(BubbleActivity.this, "Failed to load data from Firebase", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void startNewGame() {
         Random random = new Random();
         WordCharacterPair selectedPair = wordList.get(random.nextInt(wordList.size()));
-        targetWord = selectedPair.word;
-        targetChars = selectedPair.characters;
+        targetWord = selectedPair.getWord();
+        List<String> characterList = selectedPair.getCharacters();
+        targetChars = new char[characterList.size()];
+        for (int i = 0; i < characterList.size(); i++) {
+            targetChars[i] = characterList.get(i).charAt(0);
+        }
         currentIndex = 0;
 
         speakOut(targetWord);
@@ -268,9 +152,9 @@ public class BubbleActivity extends AppCompatActivity {
     }
 
     private void setupBubbles(RelativeLayout container) {
-        int numBubbles = 15;
+        int numBubbles = 12;
         int bubbleSize = 80; // in dp
-        int minDistance = 100; // in dp, minimum distance between bubbles
+        int minDistance = 110; // in dp, minimum distance between bubbles
 
         // Convert dp to pixels
         final float scale = getResources().getDisplayMetrics().density;
@@ -280,6 +164,8 @@ public class BubbleActivity extends AppCompatActivity {
         char[] characters = {'ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ',
                 'ㅏ', 'ㅑ', 'ㅓ', 'ㅕ', 'ㅗ', 'ㅛ', 'ㅜ', 'ㅠ', 'ㅡ', 'ㅣ'};
         Random random = new Random();
+
+        images = new ImageView[numBubbles];
 
         List<int[]> positions = new ArrayList<>();
         List<Character> bubbleCharacters = new ArrayList<>();
@@ -319,79 +205,38 @@ public class BubbleActivity extends AppCompatActivity {
                             break;
                         }
                     }
+                } while (overlaps);
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        // 에러 처리
-                        System.out.println("데이터베이스에서 데이터를 가져오는 중 오류 발생: " + databaseError.getMessage());
-                        try {
-                            fetchData();
-                        } catch (Exception e) {
-                            Log.e(TAG, "Error in fetchSongData: ", e);
-                        }
-                    }
-                });
-    }
+                positions.add(new int[]{leftMargin, topMargin});
 
-    private void fetchData() {
+                // Create ImageView for the bubble
+                ImageView bubble = new ImageView(BubbleActivity.this);
+                images[i] = bubble;
+                Drawable bubbleDrawable = ContextCompat.getDrawable(BubbleActivity.this, R.drawable.bubble);
+                bubble.setImageDrawable(bubbleDrawable);
 
-        Log.d("HomeAct", "fetchData called with index: " + gameIndex);
+                RelativeLayout.LayoutParams bubbleParams = new RelativeLayout.LayoutParams(bubbleSizeInPx, bubbleSizeInPx);
+                bubbleParams.leftMargin = leftMargin;
+                bubbleParams.topMargin = topMargin;
 
-//        String finalgameIndex = Integer.toString(gameIndex);
-//        Log.d("HomeAct", "finalgameindex: " + finalgameIndex);
+                container.addView(bubble, bubbleParams);
 
+                // Create TextView for the character
+                TextView textView = new TextView(BubbleActivity.this);
+                textView.setTextSize(60);
+                textView.setTextColor(Color.BLACK);
+                textView.setText(String.valueOf(bubbleCharacters.get(i)));
+                textView.setGravity(android.view.Gravity.CENTER);
 
+                RelativeLayout.LayoutParams textParams = new RelativeLayout.LayoutParams(bubbleSizeInPx, bubbleSizeInPx);
+                textParams.leftMargin = leftMargin;
+                textParams.topMargin = topMargin;
 
-        databaseReference.child("tripwords").child("tripword"+gameIndex).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    Object targetCharsObject = dataSnapshot.child("targetChars").getValue();
-                    if (targetCharsObject instanceof List) {
-                        List<String> targetCharsList = (List<String>) targetCharsObject;
+                container.addView(textView, textParams);
 
-                        // targetWord를 리스트 형식으로 가져옵니다.
-                        List<String> targetWordList = (List<String>) dataSnapshot.child("targetWord").getValue();
-
-                        // 리스트에서 첫 번째 요소를 가져와서 문자열로 변환합니다.
-                        if (targetWordList != null && !targetWordList.isEmpty()) {
-                            String targetWordValue = targetWordList.get(0);
-
-                            if (targetCharsList != null && targetWordValue != null) {
-                                // targetChars를 문자 배열로 초기화합니다.
-                                targetChars = new char[targetCharsList.size()];
-                                for (int i = 0; i < targetCharsList.size(); i++) {
-                                    String str = targetCharsList.get(i);
-
-                                    if (str != null && str.length() == 1) {  // 문자열이 정확히 한 글자인지 확인
-                                        targetChars[i] = str.charAt(0);
-                                    } else {
-                                        throw new IllegalArgumentException("인덱스 " + i + "의 요소가 한 글자가 아닙니다.");
-                                    }
-                                }
-
-                                // targetWord를 설정한다
-                                targetWord = targetWordValue;
-                                initializeGame();
-
-                            } else {
-                                Log.e(TAG, "targetWord is null");
-                            }
-                        } else {
-                            Log.e(TAG, "targetWord list is null or empty");
-                        }
-                    } else {
-                        Log.e(TAG, "targetChars is not a List");
-                    }
-                } else {
-                    Log.e(TAG, "DataSnapshot does not exist");
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(BubbleActivity.this, "Failed to load data", Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "DatabaseError: ", databaseError.toException());
+                // Set click listener for the bubble
+                final int index = i;
+                bubble.setOnClickListener(v -> handleBubbleClick(textView, bubbleCharacters.get(index)));
             }
         });
     }
@@ -406,63 +251,13 @@ public class BubbleActivity extends AppCompatActivity {
             currentIndex++;
             if (currentIndex == targetChars.length) {
                 bookmarks++;
-                showToast("게임 성공! 책갈피 획득: " + bookmarks);
+                updateBookmarkCount();
                 startNewGame();
             }
         } else {
             textView.setTextColor(Color.RED);
             loseLife();
         }
-    }
-
-    private void updateGameClear(String userKey, int gameIndex) {
-        // game1의 특정 인덱스를 1로 설정
-        databaseReference.child("Users").child(userKey).child("gameprocessivity").child("game1")
-                .child(String.valueOf(gameIndex))
-                .setValue(1)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            Log.d("HomeAct", "Game index updated successfully.");
-
-                            // bookmarkcount 값을 가져와서 +10을 더한 후 업데이트
-                            DatabaseReference bookmarkCountRef = databaseReference.child("Users").child(userKey).child("bookmarkcount");
-                            bookmarkCountRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    if (dataSnapshot.exists()) {
-                                        Long currentCount = dataSnapshot.getValue(Long.class);
-                                        if (currentCount != null) {
-                                            bookmarkCountRef.setValue(currentCount + 10)
-                                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                            if (task.isSuccessful()) {
-                                                                Log.d("HomeAct", "Bookmark count updated successfully.");
-                                                            } else {
-                                                                Log.e("HomeAct", "Failed to update bookmark count.", task.getException());
-                                                            }
-                                                        }
-                                                    });
-                                        } else {
-                                            Log.e("HomeAct", "Current bookmark count is null.");
-                                        }
-                                    } else {
-                                        Log.e("HomeAct", "Bookmark count does not exist.");
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-                                    Log.e("HomeAct", "Database error: " + databaseError.getMessage());
-                                }
-                            });
-                        } else {
-                            Log.e("HomeAct", "Failed to update game index.", task.getException());
-                        }
-                    }
-                });
     }
 
     private void loseLife() {
@@ -494,18 +289,63 @@ public class BubbleActivity extends AppCompatActivity {
     }
 
     private void showGameOverDialog() {
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.gameover_dialog, null);
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("게임 종료");
-        builder.setMessage("획득한 책갈피 수: " + bookmarks);
-        builder.setPositiveButton("다시 플레이하기", (dialog, which) -> {
-            lives = 3;
-            bookmarks = 0;
-            updateHearts();
-            startNewGame();
-        });
-        builder.setNegativeButton("나가기", (dialog, which) -> finish());
+        builder.setView(dialogView);
         builder.setCancelable(false);
-        builder.show();
+        AlertDialog alertDialog = builder.create();
+
+        TextView bookmarkCountTextView = dialogView.findViewById(R.id.bookmark_count);
+        bookmarkCountTextView.setText(bookmarks + "개 획득");
+
+        Button playAgainButton = dialogView.findViewById(R.id.play_again_btn);
+        playAgainButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                lives = 3;
+                bookmarks = 0;
+                updateHearts();
+                startNewGame();
+                alertDialog.dismiss();
+            }
+        });
+
+        Button exitButton = dialogView.findViewById(R.id.exit_btn);
+        exitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+        alertDialog.show();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        gazeTrackerManager.setGazeTrackerCallbacks(gazeCallback);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        gazeTrackerManager.startGazeTracking();
+        setOffsetOfView();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        gazeTrackerManager.stopGazeTracking();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        gazeTrackerManager.removeCallbacks(gazeCallback);
     }
 
     @Override
@@ -517,13 +357,118 @@ public class BubbleActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    private static class WordCharacterPair {
-        String word;
-        char[] characters;
+    public static class WordCharacterPair {
+        private String word;
+        private List<String> characters;
 
-        WordCharacterPair(String word, char[] characters) {
+        public WordCharacterPair() {
+        }
+
+        public WordCharacterPair(String word, char[] characters) {
             this.word = word;
+            this.characters = new ArrayList<>();
+            for (char c : characters) {
+                this.characters.add(String.valueOf(c));
+            }
+        }
+
+        public String getWord() {
+            return word;
+        }
+
+        public void setWord(String word) {
+            this.word = word;
+        }
+
+        public List<String> getCharacters() {
+            return characters;
+        }
+
+        public void setCharacters(List<String> characters) {
             this.characters = characters;
+        }
+    }
+
+    private void updateBookmarkCount() {
+        databaseReference.child("Users").child(userKey).child("bookmarkcount").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    long currentBookmarkCount = (long) dataSnapshot.getValue();
+
+                    long updatedBookmarkCount = currentBookmarkCount + 1;
+
+                    databaseReference.child("Users").child(userKey).child("bookmarkcount").setValue(updatedBookmarkCount)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        Log.d("TAG", "Bookmark count updated successfully.");
+                                    } else {
+                                        Log.e("TAG", "Failed to update bookmark count.");
+                                    }
+                                }
+                            });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e("TAG", "Failed to read bookmark count value.", databaseError.toException());
+            }
+        });
+    }
+
+    private void setOffsetOfView() {
+        viewLayoutChecker.setOverlayView(gazePathView, new ViewLayoutChecker.ViewLayoutListener() {
+            @Override
+            public void getOffset(int x, int y) {
+                gazePathView.setOffset(x, y);
+            }
+        });
+    }
+
+
+    private final GazeCallback gazeCallback = new GazeCallback() {
+        @Override
+        public void onGaze(GazeInfo gazeInfo) {
+            if (oneEuroFilterManager.filterValues(gazeInfo.timestamp, gazeInfo.x, gazeInfo.y)) {
+                float[] filtered = oneEuroFilterManager.getFilteredValues();
+                gazePathView.onGaze(filtered[0], filtered[1], gazeInfo.eyeMovementState == EyeMovementState.FIXATION);
+                handleGazeEvent(filtered[0], filtered[1]);
+            }
+        }
+    };
+    private void handleGazeEvent(float gazeX, float gazeY) {
+        long currentTime = System.currentTimeMillis();
+        for (ImageView imageView : images) {
+            int[] location = new int[2];
+            imageView.getLocationOnScreen(location);
+            float x = location[0] ; //POINT_RADIUS
+            float y = location[1] ;
+            float width = imageView.getWidth() + 40;
+            float height = imageView.getHeight() + 40;
+
+            // 시선이 특정 imageView 위에 있는지 확인
+            if (gazeX >= x && gazeX <= x + width && gazeY >= y && gazeY <= y + height) {
+                if (!gazeStartTimeMap.containsKey(imageView)) {
+                    gazeStartTimeMap.put(imageView, currentTime);
+                } else {
+                    long gazeDuration = currentTime - gazeStartTimeMap.get(imageView);
+                    if (gazeDuration >= GAZE_HOLD_DURATION) {
+                        // 메인 스레드에서 UI 업데이트 수행
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                imageView.performClick();
+                            }
+                        });
+                        gazeStartTimeMap.remove(imageView); // 시선이 유지된 후 맵에서 제거
+                    }
+                }
+            } else {
+                gazeStartTimeMap.remove(imageView); // 시선이 벗어나면 맵에서 제거
+            }
         }
     }
 }

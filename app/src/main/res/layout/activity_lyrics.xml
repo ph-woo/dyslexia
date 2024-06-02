@@ -4,7 +4,8 @@
     android:background="@color/background_color"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:keepScreenOn="true">
 
     <visual.camp.sample.view.GazePathView
         android:id="@+id/gazePathView"
