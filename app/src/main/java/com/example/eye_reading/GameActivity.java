@@ -335,6 +335,8 @@ public class GameActivity extends AppCompatActivity {
 
         navHome.setOnClickListener(v -> {
             Intent homeIntent = new Intent(getApplicationContext(), HomeActivity.class);
+            homeIntent.putExtra("USERNAME", nickname);
+            homeIntent.putExtra("USERKEY", userkey);
             startActivity(homeIntent);
         });
 

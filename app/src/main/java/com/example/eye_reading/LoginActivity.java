@@ -1,74 +1,49 @@
 package com.example.eye_reading;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.splashscreen.SplashScreen;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class LoginActivity extends AppCompatActivity {
 
     private EditText emailEditText, passwordEditText;
     private Button loginButton, registerButton;
     private FirebaseAuth mAuth;
-    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        SplashScreen.installSplashScreen(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
-
         loginButton = findViewById(R.id.loginButton);
         registerButton = findViewById(R.id.registerButton);
 
         mAuth = FirebaseAuth.getInstance();
-        mDatabase = FirebaseDatabase.getInstance("https://song-62299-default-rtdb.firebaseio.com/").getReference();
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loginUser();
-            }
-        });
+        // 앱 시작 시 로그인 상태 확인
+        checkLoginState();
 
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent gameIntent = new Intent(LoginActivity.this, IdcreateActivity.class);
-                startActivity(gameIntent);
-                finish();
-            }
+        loginButton.setOnClickListener(v -> loginUser());
+
+        registerButton.setOnClickListener(v -> {
+            Intent gameIntent = new Intent(LoginActivity.this, IdcreateActivity.class);
+            startActivity(gameIntent);
+            finish();
         });
     }
 
     private void loginUser() {
-
         String email = emailEditText.getText().toString();
         String password = passwordEditText.getText().toString();
-
 
         if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
             Toast.makeText(this, "Please fill out all the fields.", Toast.LENGTH_SHORT).show();
@@ -79,51 +54,42 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
-                        updateUI(user);
-                        String userId = user.getUid();
-
-                        Intent gameIntent = new Intent(LoginActivity.this, HomeActivity.class);
-
-                        gameIntent.putExtra("USERKEY", userId);
-                        startActivity(gameIntent);
-                        finish();
+                        if (user != null) {
+                            // 로그인 상태를 저장
+                            saveLoginState(true);
+                            // 홈 화면으로 이동
+                            Intent gameIntent = new Intent(LoginActivity.this, HomeActivity.class);
+                            gameIntent.putExtra("USERKEY", user.getUid());
+                            startActivity(gameIntent);
+                            finish();
+                        }
                     } else {
                         Toast.makeText(LoginActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
-                        updateUI(null);
                     }
                 });
-
-
-
-
-
     }
 
-
-
-
-
-
-
-
-    private void updateUI(FirebaseUser user) {
-        if (user != null) {
-            Toast.makeText(this, "로그인 성공!", Toast.LENGTH_SHORT).show();
-            // Navigate to the main activity
-        } else {
-            Toast.makeText(this, "로그인을 하세요", Toast.LENGTH_SHORT).show();
-        }
+    // SharedPreferences에 로그인 상태 저장
+    private void saveLoginState(boolean isLoggedIn) {
+        FirebaseUser user = mAuth.getCurrentUser();
+        SharedPreferences sharedPreferences = getSharedPreferences("login_state", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("isLoggedIn", isLoggedIn);
+        editor.putString("userId", user.getUid());
+        editor.apply();
     }
 
-    public static class User {
-        public String email;
-
-        public User() {
-            // Default constructor required for calls to DataSnapshot.getValue(User.class)
-        }
-
-        public User(String email) {
-            this.email = email;
+    // 앱 시작 시 로그인 상태 확인하여 홈 화면으로 이동
+    private void checkLoginState() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        SharedPreferences sharedPreferences = getSharedPreferences("login_state", MODE_PRIVATE);
+        boolean isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false);
+        if (isLoggedIn) {
+            // 로그인 상태가 저장되어 있다면 홈 화면으로 이동
+            Intent homeIntent = new Intent(this, HomeActivity.class);
+            homeIntent.putExtra("USERKEY", user.getUid());;
+            startActivity(homeIntent);
+            finish(); // 현재 액티비티 종료
         }
     }
 }

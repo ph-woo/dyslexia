@@ -44,6 +44,11 @@ public class HomeActivity extends AppCompatActivity {
         SplashScreen.installSplashScreen(this);
         setContentView(R.layout.activity_home);
 
+        Button logoutButton = findViewById(R.id.logoutButton);
+        logoutButton.setOnClickListener(v -> logoutUser());
+
+
+
         databaseReference = FirebaseDatabase.getInstance("https://song-62299-default-rtdb.firebaseio.com/").getReference();
 
 //
@@ -76,25 +81,17 @@ public class HomeActivity extends AppCompatActivity {
 //            Log.d("HomeAct", "Loaded userkey from SharedPreferences: " + userkey);
 //        }
 
+        Intent homeIntent = getIntent();
 
-
-        Intent gameIntent = getIntent();
-//        if (gameIntent != null && gameIntent.hasExtra("USERNAME")) {
-//            nickname = gameIntent.getStringExtra("USERNAME");
-//            Log.d("HomeAct", "Received nickname: " + nickname);
-//        } else {
-//            Log.e("HomeAct", "No nickname provided");
-//        }
-
-        if (gameIntent != null && gameIntent.hasExtra("USERKEY")) {
-            userkey = gameIntent.getStringExtra("USERKEY");
+        if (homeIntent != null && homeIntent.hasExtra("USERKEY")) {
+            userkey = homeIntent.getStringExtra("USERKEY");
             Log.d("HomeAct", "Received userkey: " + userkey);
         } else {
             Log.e("HomeAct", "No userkey provided");
         }
 
         fetchUsername(userkey);
-
+      
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
@@ -114,6 +111,8 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent shopIntent = new Intent(HomeActivity.this, ShopActivity.class);
+                shopIntent.putExtra("USERNAME", nickname);
+                shopIntent.putExtra("USERKEY", userkey);
                 startActivity(shopIntent);
             }
         });
@@ -263,11 +262,31 @@ public class HomeActivity extends AppCompatActivity {
                 }
             }
 
+
+
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.e("HomeAct", "Database error: " + databaseError.getMessage());
                 bookmarkCountText.setText("0");
             }
         });
+    }
+
+    private void logoutUser() {
+        // SharedPreferences에서 로그인 상태를 false로 변경
+        saveLoginState(false);
+
+        // 로그아웃 후 로그인 화면으로 이동
+        Intent loginIntent = new Intent(this, LoginActivity.class);
+        startActivity(loginIntent);
+        finish(); // 현재 액티비티 종료
+    }
+
+    // SharedPreferences에 로그인 상태 저장
+    private void saveLoginState(boolean isLoggedIn) {
+        SharedPreferences sharedPreferences = getSharedPreferences("login_state", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("isLoggedIn", isLoggedIn);
+        editor.apply();
     }
 }
