@@ -81,49 +81,7 @@ public class HomeActivity extends AppCompatActivity {
 //            Log.d("HomeAct", "Loaded userkey from SharedPreferences: " + userkey);
 //        }
 
-
-
-        Intent gameIntent = getIntent();
-//        if (gameIntent != null && gameIntent.hasExtra("USERNAME")) {
-//            nickname = gameIntent.getStringExtra("USERNAME");
-//            Log.d("HomeAct", "Received nickname: " + nickname);
-//        } else {
-//            Log.e("HomeAct", "No nickname provided");
-//        }
-
-        if (gameIntent != null && gameIntent.hasExtra("USERKEY")) {
-            userkey = gameIntent.getStringExtra("USERKEY");
-            Log.d("HomeAct", "Received userkey: " + userkey);
-        } else {
-            Log.e("HomeAct", "No userkey provided");
-        }
-
-        fetchUsername(userkey);
-
-        Intent HomeIntent = getIntent();
-//        if (gameIntent != null && gameIntent.hasExtra("USERNAME")) {
-//            nickname = gameIntent.getStringExtra("USERNAME");
-//            Log.d("HomeAct", "Received nickname: " + nickname);
-//        } else {
-//            Log.e("HomeAct", "No nickname provided");
-//        }
-
-        if (HomeIntent != null && HomeIntent.hasExtra("USERKEY")) {
-            userkey = HomeIntent.getStringExtra("USERKEY");
-            Log.d("HomeAct", "Received userkey: " + userkey);
-        } else {
-            Log.e("HomeAct", "No userkey provided");
-        }
-
-        fetchUsername(userkey);
-
         Intent homeIntent = getIntent();
-//        if (gameIntent != null && gameIntent.hasExtra("USERNAME")) {
-//            nickname = gameIntent.getStringExtra("USERNAME");
-//            Log.d("HomeAct", "Received nickname: " + nickname);
-//        } else {
-//            Log.e("HomeAct", "No nickname provided");
-//        }
 
         if (homeIntent != null && homeIntent.hasExtra("USERKEY")) {
             userkey = homeIntent.getStringExtra("USERKEY");
@@ -133,13 +91,7 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         fetchUsername(userkey);
-
-
-
-
-
-
-
+      
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
@@ -179,8 +131,10 @@ public class HomeActivity extends AppCompatActivity {
         navUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(HomeActivity.this, "계정 클릭됨", Toast.LENGTH_SHORT).show();
-                // 계정 화면으로 이동
+                Intent userIntent = new Intent(HomeActivity.this, UserActivity.class);
+                gameIntent.putExtra("USERNAME", nickname);
+                gameIntent.putExtra("USERKEY", userkey);
+                startActivity(userIntent);
             }
         });
         checkPermission();
