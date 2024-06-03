@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.app.AlertDialog;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
@@ -54,6 +55,7 @@ public class BubbleActivity extends AppCompatActivity {
     private int lives = 3;
     private int bookmarks = 0;
     private TextToSpeech tts;
+    private MediaPlayer bubblePop;
     private List<ImageView> heartImages;
 
     private GazePathView gazePathView;
@@ -93,6 +95,8 @@ public class BubbleActivity extends AppCompatActivity {
                 speakOut(targetWord);
             }
         });
+
+        bubblePop = MediaPlayer.create(this, R.raw.bubble_pop);
 
         ImageView btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> onBackPressed());
@@ -214,6 +218,7 @@ public class BubbleActivity extends AppCompatActivity {
                 images[i] = bubble;
                 Drawable bubbleDrawable = ContextCompat.getDrawable(BubbleActivity.this, R.drawable.bubble);
                 bubble.setImageDrawable(bubbleDrawable);
+                bubble.setBackgroundResource(R.drawable.ripple_effect);
 
                 RelativeLayout.LayoutParams bubbleParams = new RelativeLayout.LayoutParams(bubbleSizeInPx, bubbleSizeInPx);
                 bubbleParams.leftMargin = leftMargin;
@@ -236,12 +241,12 @@ public class BubbleActivity extends AppCompatActivity {
 
                 // Set click listener for the bubble
                 final int index = i;
-                bubble.setOnClickListener(v -> handleBubbleClick(textView, bubbleCharacters.get(index)));
+                bubble.setOnClickListener(v -> handleBubbleClick(bubble, textView, bubbleCharacters.get(index)));
             }
         });
     }
 
-    private void handleBubbleClick(TextView textView, char character) {
+    private void handleBubbleClick(ImageView bubble, TextView textView, char character) {
         if (textView.getCurrentTextColor() == Color.GREEN) {
             return;
         }
@@ -254,9 +259,39 @@ public class BubbleActivity extends AppCompatActivity {
                 updateBookmarkCount();
                 startNewGame();
             }
+            bubble.animate()
+                    .scaleX(1.2f)
+                    .scaleY(1.2f)
+                    .alpha(0.5f)
+                    .setDuration(150)
+                    .withEndAction(() -> {
+                        bubble.animate()
+                                .scaleX(1f)
+                                .scaleY(1f)
+                                .alpha(0.5f)
+                                .setDuration(150)
+                                .start();
+                    })
+                    .start();
         } else {
             textView.setTextColor(Color.RED);
             loseLife();
+            bubble.animate()
+                    .scaleX(1.1f)
+                    .scaleY(1.1f)
+                    .setDuration(150)
+                    .withEndAction(() -> {
+                        bubble.animate()
+                                .scaleX(1f)
+                                .scaleY(1f)
+                                .setDuration(150)
+                                .start();
+                    })
+                    .start();
+        }
+
+        if (bubblePop != null) {
+            bubblePop.start();
         }
     }
 
@@ -326,7 +361,6 @@ public class BubbleActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         gazeTrackerManager.setGazeTrackerCallbacks(gazeCallback);
-
     }
 
     @Override
@@ -353,6 +387,10 @@ public class BubbleActivity extends AppCompatActivity {
         if (tts != null) {
             tts.stop();
             tts.shutdown();
+        }
+        if (bubblePop != null) {
+            bubblePop.release();
+            bubblePop = null;
         }
         super.onDestroy();
     }
@@ -440,8 +478,14 @@ public class BubbleActivity extends AppCompatActivity {
         }
     };
     private void handleGazeEvent(float gazeX, float gazeY) {
+        if (images == null) {
+            Log.e("TAG", "Images array is null");
+            return;
+        }
+
         long currentTime = System.currentTimeMillis();
         for (ImageView imageView : images) {
+            if (imageView == null) continue;
             int[] location = new int[2];
             imageView.getLocationOnScreen(location);
             float x = location[0] ; //POINT_RADIUS

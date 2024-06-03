@@ -46,6 +46,11 @@
             android:exported="true" />
 
         <activity
+            android:name=".UserActivity"
+            android:theme="@style/Theme.Eye_reading"
+            android:exported="true" />
+
+        <activity
             android:name=".ShopActivity"
             android:theme="@style/Theme.Eye_reading"
             android:exported="true" />

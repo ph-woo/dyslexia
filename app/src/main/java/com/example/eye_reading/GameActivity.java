@@ -338,6 +338,16 @@ public class GameActivity extends AppCompatActivity {
             startActivity(homeIntent);
         });
 
+        navUser.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent userIntent = new Intent(GameActivity.this, UserActivity.class);
+                userIntent.putExtra("USERNAME", nickname);
+                userIntent.putExtra("USERKEY", userkey);
+                startActivity(userIntent);
+            }
+        });
+
         swUseGazeFilter.setChecked(isUseGazeFilter);
         swStatusBlink.setChecked(isStatusBlink);
         swStatusAttention.setChecked(isStatusAttention);

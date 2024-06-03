@@ -95,12 +95,6 @@ public class HomeActivity extends AppCompatActivity {
 
         fetchUsername(userkey);
 
-
-
-
-
-
-
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
@@ -138,8 +132,10 @@ public class HomeActivity extends AppCompatActivity {
         navUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(HomeActivity.this, "계정 클릭됨", Toast.LENGTH_SHORT).show();
-                // 계정 화면으로 이동
+                Intent userIntent = new Intent(HomeActivity.this, UserActivity.class);
+                gameIntent.putExtra("USERNAME", nickname);
+                gameIntent.putExtra("USERKEY", userkey);
+                startActivity(userIntent);
             }
         });
         checkPermission();

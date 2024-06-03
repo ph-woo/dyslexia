@@ -186,7 +186,7 @@ public class SongActivity extends AppCompatActivity {
             // 버튼 클릭 이벤트 설정
             songButton.setOnClickListener(v -> {
                 String songTitle = ((Button) v).getText().toString();
-                Intent intent = new Intent(SongActivity.this, EyeTracking.class);
+                Intent intent = new Intent(SongActivity.this, LyricsActivity.class);
                 intent.putExtra("SONG_TITLE", songTitle);
                 intent.putExtra("USERNAME", nickname);
                 intent.putExtra("USERKEY", userkey);
