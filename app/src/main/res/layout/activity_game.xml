@@ -270,37 +270,37 @@
         <Button
             android:id="@+id/btn_bubble_game"
             android:layout_width="360dp"
-            android:layout_height="80dp"
+            android:layout_height="100dp"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="120dp"
+            android:layout_marginTop="150dp"
             android:background="@drawable/btn_game"
             android:text="비눗방울 팡팡"
             android:textColor="@color/brown"
-            android:textSize="40sp" />
+            android:textSize="45sp" />
 
         <Button
             android:id="@+id/btn_delivery_game"
             android:layout_width="360dp"
-            android:layout_height="80dp"
+            android:layout_height="100dp"
             android:layout_below="@id/btn_bubble_game"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="60dp"
             android:background="@drawable/btn_game"
             android:text="나는야 배달부"
             android:textColor="@color/brown"
-            android:textSize="40sp" />
+            android:textSize="45sp" />
 
         <Button
             android:id="@+id/btn_song_game"
             android:layout_width="360dp"
-            android:layout_height="80dp"
+            android:layout_height="100dp"
             android:layout_below="@id/btn_delivery_game"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="60dp"
             android:background="@drawable/btn_game"
             android:text="눈으로 불러요"
             android:textColor="@color/brown"
-            android:textSize="40sp" />
+            android:textSize="45sp" />
 
         <include
             android:id="@+id/navigation_bar"

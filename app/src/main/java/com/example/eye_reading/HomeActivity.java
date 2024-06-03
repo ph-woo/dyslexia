@@ -132,8 +132,8 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent userIntent = new Intent(HomeActivity.this, UserActivity.class);
-                gameIntent.putExtra("USERNAME", nickname);
-                gameIntent.putExtra("USERKEY", userkey);
+                userIntent.putExtra("USERNAME", nickname);
+                userIntent.putExtra("USERKEY", userkey);
                 startActivity(userIntent);
             }
         });
