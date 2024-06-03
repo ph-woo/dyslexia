@@ -100,8 +100,6 @@ public class LyricsActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
-        ImageView btnBack = findViewById(R.id.btn_back);
-        btnBack.setOnClickListener(v -> onBackPressed());
 
         gazeTrackerManager = GazeTrackerManager.getInstance();
         Log.i(TAG, "gazeTracker version: " + GazeTracker.getVersionName());
@@ -233,7 +231,7 @@ System.out.println(songTitle);
                 textViews[index].setTextColor(getResources().getColor(android.R.color.holo_green_light));
                 textViews[index].setClickable(false);
             }
-//            playSound(soundSequence[correctIndex]);
+            playSound(soundSequence[correctIndex]);
 
             if (correctIndex == correctSequence.length-1) {
                 Log.d("Game", "Success condition met, showing success dialog.");
@@ -262,7 +260,7 @@ System.out.println(songTitle);
                 textViews[index].setTextColor(getResources().getColor(android.R.color.holo_red_light));
             }
             loseLife();
-//            playSound("error");
+            playSound("error");
         }
     }
 
@@ -327,17 +325,26 @@ System.out.println(songTitle);
 
         // note에 따라 음원 파일의 리소스 ID 설정
         switch (note) {
-            case "솔":
-                soundResId = R.raw.piano08;
-                break;
-            case "라":
-                soundResId = R.raw.piano10;
-                break;
-            case "미":
-                soundResId = R.raw.piano05;
+            case "도":
+                soundResId = R.raw.lowdo;
                 break;
             case "레":
-                soundResId = R.raw.piano03;
+                soundResId = R.raw.re;
+                break;
+            case "미":
+                soundResId = R.raw.me;
+                break;
+            case "파":
+                soundResId = R.raw.pa;
+                break;
+            case "솔":
+                soundResId = R.raw.sol;
+                break;
+            case "라":
+                soundResId = R.raw.ra;
+                break;
+            case "시":
+                soundResId = R.raw.si;
                 break;
             case "error":
                 soundResId = R.raw.error;
