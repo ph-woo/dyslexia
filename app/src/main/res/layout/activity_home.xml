@@ -62,7 +62,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
         android:layout_below="@id/nickname"
-        android:src="@drawable/character_dog" />
+        />
 
     <Button
         android:id="@+id/btn_shop"
