@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/background_color"
@@ -7,50 +6,168 @@
     tools:context=".UserActivity">
 
     <RelativeLayout
+        android:id="@+id/top_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="20dp">
 
         <TextView
-            android:id="@+id/text_eye_reading"
+            android:id="@+id/text_my_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="아이리딩"
+            android:text="내 정보"
             android:textSize="30sp"
+            android:textStyle="bold"
             android:textColor="@color/brown" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:id="@+id/bookmark_icon"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/bookmark" />
-
-            <TextView
-                android:id="@+id/bookmark_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:textSize="30sp"
-                android:textColor="@android:color/black"
-                android:layout_marginStart="8dp" />
-        </LinearLayout>
     </RelativeLayout>
 
-    <TextView
-        android:id="@+id/nickname"
+    <RelativeLayout
+        android:id="@+id/nickname_info"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="90dp"
+        android:layout_below="@id/top_bar"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="100dp"
-        android:text="닉네임"
-        android:textSize="30sp"
-        android:textColor="@android:color/black" />
+        android:layout_marginTop="10dp"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/nickname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="김아이"
+            android:textSize="30sp"
+            android:textColor="@android:color/black" />
+
+        <EditText
+            android:id="@+id/nickname_edit"
+            android:layout_width="160dp"
+            android:layout_height="70dp"
+            android:layout_centerVertical="true"
+            android:visibility="gone"
+            android:textSize="24sp"
+            android:inputType="text"
+            android:background="@drawable/edit_text_background"
+            android:padding="10dp"/>
+
+        <Button
+            android:id="@+id/nickname_edit_button"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/nickname"
+            android:layout_marginStart="20dp"
+            android:layout_centerVertical="true"
+            android:text="닉네임 변경"
+            android:textSize="24sp"
+            android:textColor="@color/brown"
+            android:background="@drawable/rounded_basic"/>
+
+        <Button
+            android:id="@+id/nickname_cancel_button"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/nickname_edit"
+            android:layout_marginStart="15dp"
+            android:layout_centerVertical="true"
+            android:text="취소"
+            android:textSize="24sp"
+            android:textColor="@color/brown"
+            android:background="@drawable/rounded_basic"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/nickname_confirm_button"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/nickname_cancel_button"
+            android:layout_marginStart="15dp"
+            android:layout_centerVertical="true"
+            android:text="확인"
+            android:textSize="24sp"
+            android:textColor="@color/brown"
+            android:background="@drawable/rounded_basic"
+            android:alpha="0.5"
+            android:visibility="gone"
+            android:enabled="false" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/parent_guide"
+        android:layout_width="wrap_content"
+        android:layout_height="90dp"
+        android:layout_below="@id/nickname_info"
+        android:layout_above="@id/logoutButton"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="40dp"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/guide_background">
+
+        <RelativeLayout
+            android:id="@+id/guide_top"
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:paddingVertical="20dp"
+            android:paddingHorizontal="20dp">
+
+            <ImageView
+                android:id="@+id/guide_icon"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_centerVertical="true"
+                android:src="@drawable/book" />
+
+            <TextView
+                android:id="@+id/guide_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/guide_icon"
+                android:layout_marginStart="15dp"
+                android:layout_centerVertical="true"
+                android:text="부모용 가이드"
+                android:textSize="30sp"
+                android:textColor="@android:color/black" />
+
+            <ImageView
+                android:id="@+id/guide_arrow"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_toEndOf="@id/guide_text"
+                android:layout_marginStart="25dp"
+                android:layout_centerVertical="true"
+                android:src="@drawable/down" />
+        </RelativeLayout>
+
+        <ScrollView
+            android:id="@+id/guide_content"
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/guide_top"
+            android:layout_centerHorizontal="true"
+            android:paddingHorizontal="5dp"
+            android:fillViewport="true"
+            android:visibility="gone">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="10dp"
+                android:text="아이리딩은 난독증을 가진 아이들의 개선 훈련을 도와주는 앱입니다.\n총 세 가지의 게임이 있습니다.\n\n1. 음운 인식 훈련\n2. 파닉스 훈련\n3. 시각 집중력 훈련"
+                android:textSize="20sp"
+                android:textColor="@android:color/black" />
+        </ScrollView>
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/logoutButton"
+        android:layout_width="320dp"
+        android:layout_height="80dp"
+        android:layout_centerHorizontal="true"
+        android:text="로그아웃"
+        android:textSize="32sp"
+        android:textColor="@color/brown"
+        android:background="@drawable/rounded_basic"
+        android:layout_above="@id/navigation_bar"
+        android:layout_marginBottom="40dp" />
 
     <include
         android:id="@+id/navigation_bar"
@@ -58,5 +175,4 @@
         android:layout_width="match_parent"
         android:layout_height="90dp"
         android:layout_alignParentBottom="true" />
-
 </RelativeLayout>

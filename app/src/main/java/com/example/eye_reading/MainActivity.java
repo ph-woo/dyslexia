@@ -11,10 +11,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        SplashScreen.installSplashScreen(this);
-
-
-
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("");
+        }
 
         SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
         boolean isRegistered = sharedPreferences.getBoolean("isRegistered", false);
@@ -24,8 +23,8 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, HomeActivity.class);
             startActivity(intent);
         } else {
-            // IdcreateActivity로 이동
-            Intent intent = new Intent(MainActivity.this, IdcreateActivity.class);
+            // SignUpActivity로 이동
+            Intent intent = new Intent(MainActivity.this, SignUpActivity.class);
             startActivity(intent);
        }
         finish();

@@ -75,10 +75,6 @@ public class LyricsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lyrics);
 
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("");
-        }
-
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("SONG_TITLE")) {
             songTitle = intent.getStringExtra("SONG_TITLE");
@@ -98,6 +94,9 @@ public class LyricsActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
+
+        ImageView btnBack = findViewById(R.id.btn_back);
+        btnBack.setOnClickListener(v -> onBackPressed());
 
         gazeTrackerManager = GazeTrackerManager.getInstance();
         Log.i(TAG, "gazeTracker version: " + GazeTracker.getVersionName());
@@ -179,8 +178,8 @@ public class LyricsActivity extends AppCompatActivity {
             final int index = i;
             textViews[i] = new TextView(this);
             textViews[i].setText(correctSequence[i]);
-            textViews[i].setTextSize(40);
-            textViews[i].setPadding(40, 16, 40, 36);
+            textViews[i].setTextSize(34);
+            textViews[i].setPadding(40, 16, 40, 26);
             textViews[i].setClickable(true);
             textViews[i].setOnClickListener(new View.OnClickListener() {
                 @Override

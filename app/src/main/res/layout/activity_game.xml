@@ -254,6 +254,7 @@
         android:layout_height="match_parent">
 
         <RelativeLayout
+            android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="20dp">
@@ -263,8 +264,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="게임하기"
-                android:textColor="@color/brown"
-                android:textSize="30sp" />
+                android:textSize="30sp"
+                android:textStyle="bold"
+                android:textColor="@color/brown" />
         </RelativeLayout>
 
         <Button
