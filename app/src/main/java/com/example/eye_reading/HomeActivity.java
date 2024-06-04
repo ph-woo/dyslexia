@@ -38,6 +38,11 @@ public class HomeActivity extends AppCompatActivity {
     private TextView bookmarkCountText;
     private TextView nicknameText;
 
+    private ImageView currentCharacterImage;
+
+    String currentCharacter = "";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,35 +56,8 @@ public class HomeActivity extends AppCompatActivity {
 
         databaseReference = FirebaseDatabase.getInstance("https://song-62299-default-rtdb.firebaseio.com/").getReference();
 
-//
-//         SharedPreferences에서 회원가입 정보를 불러옴
-//        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-//        nickname = sharedPreferences.getString("username", null);
-//        userkey = sharedPreferences.getString("userkey", null);
-//
-//        if (nickname == null || nickname.isEmpty()) {
-//            Log.e("HomeAct", "No nickname found in SharedPreferences");
-//            // 사용자에게 알림 또는 다시 로그인 화면으로 이동
-//            Toast.makeText(this, "No nickname found, please log in again.", Toast.LENGTH_SHORT).show();
-//            Intent intent = new Intent(HomeActivity.this, IdcreateActivity.class);
-//            startActivity(intent);
-//            finish();
-//            return;
-//        } else {
-//            Log.d("HomeAct", "Loaded nickname from SharedPreferences: " + nickname);
-//        }
-//
-//        if (userkey == null || userkey.isEmpty()) {
-//            Log.e("HomeAct", "No userkey found in SharedPreferences");
-//            // 사용자에게 알림 또는 다시 로그인 화면으로 이동
-//            Toast.makeText(this, "No user key found, please log in again.", Toast.LENGTH_SHORT).show();
-//            Intent intent = new Intent(HomeActivity.this, IdcreateActivity.class);
-//            startActivity(intent);
-//            finish();
-//            return;
-//        } else {
-//            Log.d("HomeAct", "Loaded userkey from SharedPreferences: " + userkey);
-//        }
+
+
 
         Intent homeIntent = getIntent();
 
@@ -91,7 +69,21 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         fetchUsername(userkey);
-      
+
+
+
+
+// current character views 초기화
+        currentCharacterImage = findViewById(R.id.character);
+
+        fetchingCurrentCharacterData();
+
+
+
+
+
+
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
@@ -235,6 +227,81 @@ public class HomeActivity extends AppCompatActivity {
                 Log.e("HomeAct", "Database error: " + error.getMessage());
             }
         });
+    }
+
+    public void fetchingCurrentCharacterData() {
+        // 데이터베이스에서 currentCharacter와 ownedCharacters를 가져오기
+        databaseReference.child("Users").child(userkey).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // currentCharacter 값을 가져와 설정
+                if (dataSnapshot.child("currentCharacter").exists()) {
+                    currentCharacter = dataSnapshot.child("currentCharacter").getValue(String.class);
+                } else {
+                    currentCharacter = "기본 캐릭터"; // 기본 값 설정
+                }
+                System.out.println("현재 캐릭터: " + currentCharacter);
+                updateCurrentCharacterInfo();
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // 데이터베이스 접근 중 오류 발생 시 처리
+                System.err.println("데이터 읽기 실패: " + databaseError.getMessage());
+            }
+        });
+    }
+
+    private void updateCurrentCharacterInfo() {
+        if (currentCharacter != null) {
+            switch (currentCharacter) {
+                case "강아지":
+                    currentCharacterImage.setImageResource(R.drawable.character_dog);
+
+                    break;
+                case "돼지":
+                    currentCharacterImage.setImageResource(R.drawable.character_pig);
+
+                    break;
+                case "판다":
+                    currentCharacterImage.setImageResource(R.drawable.character_panda);
+
+                    break;
+                case "원숭이":
+                    currentCharacterImage.setImageResource(R.drawable.character_monkey);
+
+                    break;
+                case "기린":
+                    currentCharacterImage.setImageResource(R.drawable.character_giraffe);
+
+                    break;
+                case "젖소":
+                    currentCharacterImage.setImageResource(R.drawable.character_milkcow);
+
+                    break;
+                case "펭귄":
+                    currentCharacterImage.setImageResource(R.drawable.character_penguin);
+
+                    break;
+                case "호랑이":
+                    currentCharacterImage.setImageResource(R.drawable.character_tiger);
+
+                    break;
+                case "얼룩말":
+                    currentCharacterImage.setImageResource(R.drawable.character_zebra);
+
+                    break;
+                case "사자":
+                    currentCharacterImage.setImageResource(R.drawable.character_lion);
+
+                    break;
+                default:
+                    currentCharacterImage.setImageResource(R.drawable.character_dog);
+
+                    break;
+            }
+        }
     }
 
 

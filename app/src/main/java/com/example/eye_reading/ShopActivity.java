@@ -39,6 +39,12 @@ public class ShopActivity extends AppCompatActivity {
     String nickname="";
     String userkey="";
 
+
+    // 현재 캐릭터 정보 뷰 선언
+    private ImageView currentCharacterImage;
+    private TextView currentCharacterName;
+    private TextView currentCharacterDescription;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,6 +91,13 @@ public class ShopActivity extends AppCompatActivity {
 //        ownedCharacters = new HashSet<>();
 //        ownedCharacters.add("강아지");
 //        ownedCharacters.add("판다");
+
+        // current character views 초기화
+        currentCharacterImage = findViewById(R.id.current_character_image);
+        currentCharacterName = findViewById(R.id.current_character_name);
+        currentCharacterDescription = findViewById(R.id.current_character_description);
+
+
         fetchingCharacterData();
         addCharacterItems();
         System.out.println(currentCharacter);
@@ -149,6 +162,8 @@ public class ShopActivity extends AppCompatActivity {
 
                     System.out.println(currentCharacter);
                     databaseReference.child("Users").child(userkey).child("currentCharacter").setValue(currentCharacter);
+
+                    updateCurrentCharacterInfo();
                     refreshCharacterItems(); // 캐릭터 아이템을 새로고침하는 메서드 호출
 //                    addCharacterItems();
                 })
@@ -165,9 +180,21 @@ public class ShopActivity extends AppCompatActivity {
                     System.out.println(bookmarks);
                     readBookmarkCount(bookmarks);
                     ownedCharacters.add(character.getName());
-                    databaseReference.child("Users").child(userkey).child("characters").push().setValue(character.getName());
-                    refreshCharacterItems(); // 캐릭터 아이템을 새로고침하는 메서드 호출
-//                    addCharacterItems();
+
+                    // 데이터베이스에서 'characters'의 크기를 가져와서 해당 인덱스에 추가
+                    databaseReference.child("Users").child(userkey).child("characters").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            long index = dataSnapshot.getChildrenCount();
+                            databaseReference.child("Users").child(userkey).child("characters").child(String.valueOf(index)).setValue(character.getName());
+                            refreshCharacterItems(); // 캐릭터 아이템을 새로고침하는 메서드 호출
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            // 오류 처리
+                        }
+                    });
                 })
                 .setNegativeButton("창 닫기", null)
                 .show();
@@ -267,6 +294,7 @@ public class ShopActivity extends AppCompatActivity {
                 if (dataSnapshot.child("characters").exists()) {
                     ownedCharacters.clear();
                     for (DataSnapshot characterSnapshot : dataSnapshot.child("characters").getChildren()) {
+                        // 데이터베이스에서 문자열을 가져옴
                         String characterName = characterSnapshot.getValue(String.class);
                         ownedCharacters.add(characterName);
                     }
@@ -276,6 +304,9 @@ public class ShopActivity extends AppCompatActivity {
                     ownedCharacters.add("기본 캐릭터2");
                 }
                 System.out.println("소유한 캐릭터: " + ownedCharacters);
+
+                // 현재 캐릭터 정보를 View에 업데이트
+                updateCurrentCharacterInfo();
 
                 // 필요한 경우 추가 작업
                 refreshCharacterItems(); // 캐릭터 아이템을 새로고침하는 메서드 호출
@@ -289,6 +320,28 @@ public class ShopActivity extends AppCompatActivity {
         });
     }
 
+
+
+    private void updateCurrentCharacterInfo() {
+        if (currentCharacter != null) {
+            Character character = getCharacterByName(currentCharacter);
+            if (character != null) {
+                currentCharacterImage.setImageResource(character.getImageResId());
+                currentCharacterName.setText(character.getName());
+                currentCharacterDescription.setText(character.getDescription());
+            }
+        }
+    }
+
+    // 캐릭터 이름으로 캐릭터 객체를 가져오는 헬퍼 메서드
+    private Character getCharacterByName(String characterName) {
+        for (Character character : getCharacters()) {
+            if (character.getName().equals(characterName)) {
+                return character;
+            }
+        }
+        return null;
+    }
 
     private static class Character {
         private final int imageResId;

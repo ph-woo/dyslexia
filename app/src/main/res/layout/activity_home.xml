@@ -69,7 +69,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
         android:layout_below="@id/nickname"
-        android:src="@drawable/character_dog" />
+        />
 
     <!-- '캐릭터 사러가기' 버튼 -->
     <Button
