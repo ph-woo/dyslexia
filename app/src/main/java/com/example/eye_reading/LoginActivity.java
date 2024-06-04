@@ -4,28 +4,36 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.splashscreen.SplashScreen;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
-
     private EditText emailEditText, passwordEditText;
-    private Button loginButton, registerButton;
+    private Button loginButton;
+    private TextView registerText;
     private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SplashScreen.installSplashScreen(this);
         setContentView(R.layout.activity_login);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("");
+        }
 
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         loginButton = findViewById(R.id.loginButton);
-        registerButton = findViewById(R.id.registerButton);
+        registerText = findViewById(R.id.registerText);
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -34,8 +42,8 @@ public class LoginActivity extends AppCompatActivity {
 
         loginButton.setOnClickListener(v -> loginUser());
 
-        registerButton.setOnClickListener(v -> {
-            Intent gameIntent = new Intent(LoginActivity.this, IdcreateActivity.class);
+        registerText.setOnClickListener(v -> {
+            Intent gameIntent = new Intent(LoginActivity.this, SignUpActivity.class);
             startActivity(gameIntent);
             finish();
         });
@@ -44,10 +52,22 @@ public class LoginActivity extends AppCompatActivity {
     private void loginUser() {
         String email = emailEditText.getText().toString();
         String password = passwordEditText.getText().toString();
+        TextView errorTextView = findViewById(R.id.errorText);
 
         if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
-            Toast.makeText(this, "Please fill out all the fields.", Toast.LENGTH_SHORT).show();
+            String errorMessage = "";
+            if (TextUtils.isEmpty(email)) {
+                errorMessage = "이메일을 입력해주세요.";
+            }
+            else if (TextUtils.isEmpty(password)) {
+                errorMessage = "비밀번호를 입력해주세요.";
+            }
+
+            errorTextView.setText(errorMessage);
+            errorTextView.setVisibility(View.VISIBLE);
             return;
+        } else {
+            errorTextView.setVisibility(View.GONE);
         }
 
         mAuth.signInWithEmailAndPassword(email, password)
@@ -64,7 +84,8 @@ public class LoginActivity extends AppCompatActivity {
                             finish();
                         }
                     } else {
-                        Toast.makeText(LoginActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+                        errorTextView.setText("이메일 또는 비밀번호를 확인해주세요.");
+                        errorTextView.setVisibility(View.VISIBLE);
                     }
                 });
     }
@@ -93,4 +114,3 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 }
-

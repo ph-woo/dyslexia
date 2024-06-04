@@ -7,6 +7,7 @@
     tools:context=".HomeActivity">
 
     <RelativeLayout
+        android:id="@+id/top_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="20dp">
@@ -17,15 +18,8 @@
             android:layout_height="wrap_content"
             android:text="아이리딩"
             android:textSize="30sp"
+            android:textStyle="bold"
             android:textColor="@color/brown" />
-
-        <Button
-            android:id="@+id/logoutButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="로그아웃"
-            android:layout_marginTop="16dp"
-            android:layout_centerHorizontal="true"/>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -35,8 +29,9 @@
 
             <ImageView
                 android:id="@+id/bookmark_icon"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_gravity="center_vertical"
                 android:src="@drawable/bookmark" />
 
             <TextView
@@ -46,11 +41,10 @@
                 android:text=""
                 android:textSize="30sp"
                 android:textColor="@android:color/black"
-                android:layout_marginStart="8dp" />
+                android:layout_marginStart="10dp" />
         </LinearLayout>
     </RelativeLayout>
 
-    <!-- 닉네임 -->
     <TextView
         android:id="@+id/nickname"
         android:layout_width="wrap_content"
@@ -61,7 +55,6 @@
         android:textSize="30sp"
         android:textColor="@android:color/black" />
 
-    <!-- 캐릭터 이미지 -->
     <ImageView
         android:id="@+id/character"
         android:layout_width="wrap_content"
@@ -71,16 +64,15 @@
         android:layout_below="@id/nickname"
         android:src="@drawable/character_dog" />
 
-    <!-- '캐릭터 사러가기' 버튼 -->
     <Button
         android:id="@+id/btn_shop"
-        android:layout_width="300dp"
+        android:layout_width="320dp"
         android:layout_height="70dp"
         android:layout_centerHorizontal="true"
         android:layout_below="@id/character"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="30dp"
         android:text="캐릭터 사러가기"
-        android:textSize="28sp"
+        android:textSize="30sp"
         android:textColor="@color/brown"
         android:paddingLeft="30dp"
         android:drawableLeft="@drawable/shop_resize"

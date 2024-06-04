@@ -721,7 +721,7 @@ public class GameActivity extends AppCompatActivity {
             // When calibration is finished, calibration data is stored to SharedPreference
 
             hideCalibrationView();
-            showToast("calibrationFinished", true);
+            showToast("시선 교정 완료", true);
             if(mode == 1 ){
                 Intent intent = new Intent(getApplicationContext(), BubbleActivity.class);
                 intent.putExtra("USERNAME", nickname);

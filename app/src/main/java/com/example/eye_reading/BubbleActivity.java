@@ -55,7 +55,7 @@ public class BubbleActivity extends AppCompatActivity {
     private int lives = 3;
     private int bookmarks = 0;
     private TextToSpeech tts;
-    private MediaPlayer bubblePop;
+    private MediaPlayer bubblePop, bubbleError;
     private List<ImageView> heartImages;
 
     private GazePathView gazePathView;
@@ -97,6 +97,7 @@ public class BubbleActivity extends AppCompatActivity {
         });
 
         bubblePop = MediaPlayer.create(this, R.raw.bubble_pop);
+        bubbleError = MediaPlayer.create(this, R.raw.bubble_error);
 
         ImageView btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> onBackPressed());
@@ -259,6 +260,9 @@ public class BubbleActivity extends AppCompatActivity {
                 updateBookmarkCount();
                 startNewGame();
             }
+            if (bubblePop != null) {
+                bubblePop.start();
+            }
             bubble.animate()
                     .scaleX(1.2f)
                     .scaleY(1.2f)
@@ -276,6 +280,9 @@ public class BubbleActivity extends AppCompatActivity {
         } else {
             textView.setTextColor(Color.RED);
             loseLife();
+            if (bubbleError != null) {
+                bubbleError.start();
+            }
             bubble.animate()
                     .scaleX(1.1f)
                     .scaleY(1.1f)
@@ -288,10 +295,6 @@ public class BubbleActivity extends AppCompatActivity {
                                 .start();
                     })
                     .start();
-        }
-
-        if (bubblePop != null) {
-            bubblePop.start();
         }
     }
 

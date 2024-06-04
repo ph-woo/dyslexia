@@ -41,13 +41,10 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SplashScreen.installSplashScreen(this);
         setContentView(R.layout.activity_home);
-
-        Button logoutButton = findViewById(R.id.logoutButton);
-        logoutButton.setOnClickListener(v -> logoutUser());
-
-
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("");
+        }
 
         databaseReference = FirebaseDatabase.getInstance("https://song-62299-default-rtdb.firebaseio.com/").getReference();
 
@@ -91,10 +88,6 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         fetchUsername(userkey);
-      
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("");
-        }
 
         Button BtnShop = findViewById(R.id.btn_shop);
         nicknameText = findViewById(R.id.nickname);
@@ -262,31 +255,11 @@ public class HomeActivity extends AppCompatActivity {
                 }
             }
 
-
-
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.e("HomeAct", "Database error: " + databaseError.getMessage());
                 bookmarkCountText.setText("0");
             }
         });
-    }
-
-    private void logoutUser() {
-        // SharedPreferences에서 로그인 상태를 false로 변경
-        saveLoginState(false);
-
-        // 로그아웃 후 로그인 화면으로 이동
-        Intent loginIntent = new Intent(this, LoginActivity.class);
-        startActivity(loginIntent);
-        finish(); // 현재 액티비티 종료
-    }
-
-    // SharedPreferences에 로그인 상태 저장
-    private void saveLoginState(boolean isLoggedIn) {
-        SharedPreferences sharedPreferences = getSharedPreferences("login_state", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("isLoggedIn", isLoggedIn);
-        editor.apply();
     }
 }
