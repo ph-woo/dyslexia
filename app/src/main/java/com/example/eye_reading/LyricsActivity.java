@@ -561,9 +561,6 @@ public class LyricsActivity extends UserKeyActivity {
 
     @Override
     protected void onDestroy() {
-        if (gazeTrackerManager != null) {
-            gazeTrackerManager.deinitGazeTracker();
-        }
         if (countDownTimer != null) {
             countDownTimer.cancel();
         }
