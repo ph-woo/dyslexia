@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -21,6 +22,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -125,98 +128,168 @@ public class ShopActivity extends UserKeyActivity {
             ImageView characterImage = characterLayout.findViewById(R.id.character_image);
             TextView characterName = characterLayout.findViewById(R.id.character_name);
             TextView characterDescription = characterLayout.findViewById(R.id.character_description);
+            ImageView bookmarkIcon = characterLayout.findViewById(R.id.character_bookmark_icon);
             TextView characterPrice = characterLayout.findViewById(R.id.character_price);
+            TextView characterStatus = characterLayout.findViewById(R.id.character_status);
 
             characterImage.setImageResource(character.getImageResId());
             characterName.setText(character.getName());
             characterDescription.setText(character.getDescription());
-            characterPrice.setText(String.valueOf(character.getPrice()));
 
-            // 매개변수로 character와 characterLayout을 전달하여 배경색과 클릭 리스너를 설정
-            updatingBackgroundColor(character, characterLayout);
-
+            if (ownedCharacters.contains(character.getName())) {
+                characterLayout.setBackground(currentCharacter != null && currentCharacter.equals(character.getName()) ?
+                        getDrawable(R.drawable.rounded_green) : getDrawable(R.drawable.rounded_orange));
+                characterStatus.setText(currentCharacter != null && currentCharacter.equals(character.getName()) ?
+                        "장착중" : "보유중");
+                characterStatus.setVisibility(View.VISIBLE);
+                bookmarkIcon.setVisibility(View.GONE);
+                characterPrice.setVisibility(View.GONE);
+                characterLayout.setOnClickListener(v -> {
+                    if (!character.getName().equals(currentCharacter)) {
+                        showEquipDialog(character.getName());
+                    }
+                });
+            } else {
+                characterStatus.setVisibility(View.GONE);
+                bookmarkIcon.setVisibility(View.VISIBLE);
+                characterPrice.setText(String.valueOf(character.getPrice()));
+                characterPrice.setVisibility(View.VISIBLE);
+                characterLayout.setOnClickListener(v -> {
+                    if (bookmarks >= character.getPrice()) {
+                        System.out.println(bookmarks);
+                        showPurchaseDialog(character);
+                    } else {
+                        System.out.println(bookmarks);
+                        showInsufficientBookmarksDialog();
+                    }
+                });
+            }
             characterContainer.addView(characterLayout);
-        }
-    }
-
-    private void updatingBackgroundColor(Character character, RelativeLayout characterLayout) {
-        if (ownedCharacters.contains(character.getName())) {
-            characterLayout.setBackground(currentCharacter != null && currentCharacter.equals(character.getName()) ?
-                    getDrawable(R.drawable.rounded_blue) : getDrawable(R.drawable.rounded_green));
-            characterLayout.setOnClickListener(v -> {
-                if (!character.getName().equals(currentCharacter)) {
-                    showEquipDialog(character.getName());
-                }
-            });
-        } else {
-            characterLayout.setOnClickListener(v -> {
-                if (bookmarks >= character.getPrice()) {
-                    System.out.println(bookmarks);
-                    showPurchaseDialog(character);
-                } else {
-                    System.out.println(bookmarks);
-                    showInsufficientBookmarksDialog();
-                }
-            });
         }
     }
     private void refreshCharacterItems() {
         characterContainer.removeAllViews();
         addCharacterItems();
     }
+
     private void showEquipDialog(String characterName) {
-        new AlertDialog.Builder(this)
-                .setTitle("캐릭터 장착")
-                .setMessage("이 캐릭터를 장착하시겠습니까?")
-                .setPositiveButton("장착하기", (dialog, which) -> {
-                    currentCharacter = characterName;
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.shop_dialog, null);
 
-                    System.out.println(currentCharacter);
-                    databaseReference.child("Users").child(userkey).child("currentCharacter").setValue(currentCharacter);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+        builder.setCancelable(false);
+        AlertDialog alertDialog = builder.create();
 
-                    updateCurrentCharacterInfo();
-                    refreshCharacterItems(); // 캐릭터 아이템을 새로고침하는 메서드 호출
-//                    addCharacterItems();
-                })
-                .setNegativeButton("창 닫기", null)
-                .show();
+        TextView title = dialogView.findViewById(R.id.title);
+        TextView message = dialogView.findViewById(R.id.message);
+        Button closeButton = dialogView.findViewById(R.id.close_btn);
+        Button actionButton = dialogView.findViewById(R.id.action_btn);
+
+        title.setText("캐릭터 장착");
+        message.setText("이 캐릭터를 장착하시겠습니까?");
+        actionButton.setText("장착하기");
+
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.dismiss();
+            }
+        });
+
+        actionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                currentCharacter = characterName;
+
+                System.out.println(currentCharacter);
+                databaseReference.child("Users").child(userkey).child("currentCharacter").setValue(currentCharacter);
+
+                updateCurrentCharacterInfo();
+                refreshCharacterItems();
+                addCharacterItems();
+                alertDialog.dismiss();
+            }
+        });
+        alertDialog.show();
     }
 
     private void showPurchaseDialog(Character character) {
-        new AlertDialog.Builder(this)
-                .setTitle("캐릭터 구매")
-                .setMessage("이 캐릭터를 구매하시겠습니까?")
-                .setPositiveButton("구매하기", (dialog, which) -> {
-                    bookmarks -= character.getPrice();
-                    System.out.println(bookmarks);
-                    readBookmarkCount(bookmarks);
-                    ownedCharacters.add(character.getName());
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.shop_dialog, null);
 
-                    // 데이터베이스에서 'characters'의 크기를 가져와서 해당 인덱스에 추가
-                    databaseReference.child("Users").child(userkey).child("characters").addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            long index = dataSnapshot.getChildrenCount();
-                            databaseReference.child("Users").child(userkey).child("characters").child(String.valueOf(index)).setValue(character.getName());
-                            refreshCharacterItems(); // 캐릭터 아이템을 새로고침하는 메서드 호출
-                        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+        builder.setCancelable(false);
+        AlertDialog alertDialog = builder.create();
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-                            // 오류 처리
-                        }
-                    });
-                })
-                .setNegativeButton("창 닫기", null)
-                .show();
+        TextView title = dialogView.findViewById(R.id.title);
+        TextView message = dialogView.findViewById(R.id.message);
+        Button closeButton = dialogView.findViewById(R.id.close_btn);
+        Button actionButton = dialogView.findViewById(R.id.action_btn);
+
+        title.setText("캐릭터 구매");
+        message.setText("이 캐릭터를 구매하시겠습니까?");
+        actionButton.setText("구매하기");
+
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.dismiss();
+            }
+        });
+
+        actionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bookmarks -= character.getPrice();
+                System.out.println(bookmarks);
+                readBookmarkCount(bookmarks);
+                ownedCharacters.add(character.getName());
+
+                // 데이터베이스에서 'characters'의 크기를 가져와서 해당 인덱스에 추가
+                databaseReference.child("Users").child(userkey).child("characters").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        long index = dataSnapshot.getChildrenCount();
+                        databaseReference.child("Users").child(userkey).child("characters").child(String.valueOf(index)).setValue(character.getName());
+                        refreshCharacterItems(); // 캐릭터 아이템을 새로고침하는 메서드 호출
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        // 오류 처리
+                    }
+                });
+            }
+        });
+        alertDialog.show();
     }
 
     private void showInsufficientBookmarksDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("책갈피 부족")
-                .setMessage("책갈피가 부족해요.")
-                .setPositiveButton("확인", null)
-                .show();
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.shop_dialog, null);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+        builder.setCancelable(false);
+        AlertDialog alertDialog = builder.create();
+
+        TextView title = dialogView.findViewById(R.id.title);
+        TextView message = dialogView.findViewById(R.id.message);
+        Button closeButton = dialogView.findViewById(R.id.close_btn);
+        Button actionButton = dialogView.findViewById(R.id.action_btn);
+
+        title.setText("책갈피 부족");
+        message.setText("책갈피가 부족해요.");
+        closeButton.setText("확인");
+        actionButton.setVisibility(View.GONE);
+
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.dismiss();
+            }
+        });
+
+        alertDialog.show();
     }
 
     private List<Character> getCharacters() {

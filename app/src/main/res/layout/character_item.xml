@@ -59,5 +59,14 @@
             android:textSize="20sp"
             android:textColor="@android:color/black"
             android:layout_marginStart="6dp" />
+
+        <TextView
+            android:id="@+id/character_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:textSize="20sp"
+            android:textColor="@color/brown"
+            android:visibility="gone"/>
     </LinearLayout>
 </RelativeLayout>

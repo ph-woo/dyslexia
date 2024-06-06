@@ -3,6 +3,7 @@ package com.example.eye_reading;
 import android.animation.ObjectAnimator;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -48,11 +49,13 @@ public class DeliveryActivity extends UserKeyActivity {
     private List<WordPair> wordList;
     private String targetWord;
     private List<String> candidateWords;
+    private String currentCharacter = "강아지";
     private int bookmarks = 0;
     private TextToSpeech tts;
+    private MediaPlayer deliverySuccess, deliveryFailure;
     private TextView house1Text, house2Text, house3Text;
-    private ImageView truck;
-    private RelativeLayout container;
+    private RelativeLayout container, truck;
+    private ImageView bike, characterFace;
     private TextView timerText;
     private CountDownTimer countDownTimer;
     private boolean truckMoving = false;
@@ -63,6 +66,7 @@ public class DeliveryActivity extends UserKeyActivity {
     private static final long GAZE_UPDATE_INTERVAL = 135; // 0.135초
     private float gazeX, gazeY;
     private long lastTime = 0;
+    private boolean isGameOver = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +88,8 @@ public class DeliveryActivity extends UserKeyActivity {
 
         userKey=getUserId();
 
+        databaseReference = FirebaseDatabase.getInstance("https://song-62299-default-rtdb.firebaseio.com/").getReference();
+
         tts = new TextToSpeech(this, status -> {
             if (status != TextToSpeech.ERROR) {
                 tts.setLanguage(Locale.KOREAN);
@@ -91,9 +97,16 @@ public class DeliveryActivity extends UserKeyActivity {
             }
         });
 
+        deliverySuccess = MediaPlayer.create(this, R.raw.doorbell);
+        deliveryFailure = MediaPlayer.create(this, R.raw.error);
+
         truck = findViewById(R.id.truck);
+        bike = findViewById(R.id.bike);
+        characterFace = findViewById(R.id.character_face);
         container = findViewById(R.id.container);
         timerText = findViewById(R.id.timer_text);
+
+        setCharacterFace();
 
         house1Text = findViewById(R.id.house1_word);
         house2Text = findViewById(R.id.house2_word);
@@ -117,7 +130,6 @@ public class DeliveryActivity extends UserKeyActivity {
         handler = new Handler(Looper.getMainLooper());
         handler.post(gazeRunnable);
 
-        databaseReference = FirebaseDatabase.getInstance("https://song-62299-default-rtdb.firebaseio.com/").getReference();
         fetchData();
         startTimer();
 
@@ -127,6 +139,7 @@ public class DeliveryActivity extends UserKeyActivity {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                if (isGameOver) return false;
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         dX = v.getX() - event.getRawX();
@@ -184,6 +197,47 @@ public class DeliveryActivity extends UserKeyActivity {
         });
     }
 
+    private void setCharacterFace() {
+        if (currentCharacter != null) {
+            switch (currentCharacter) {
+                case "강아지":
+                    characterFace.setImageResource(R.drawable.face_dog);
+                    break;
+                case "돼지":
+                    characterFace.setImageResource(R.drawable.face_pig);
+                    break;
+                case "판다":
+                    characterFace.setImageResource(R.drawable.face_panda);
+                    break;
+                case "원숭이":
+                    characterFace.setImageResource(R.drawable.face_monkey);
+                    break;
+                case "기린":
+                    characterFace.setImageResource(R.drawable.face_giraffe);
+                    break;
+                case "젖소":
+                    characterFace.setImageResource(R.drawable.face_milkcow);
+                    break;
+                case "펭귄":
+                    characterFace.setImageResource(R.drawable.face_penguin);
+                    break;
+                case "호랑이":
+                    characterFace.setImageResource(R.drawable.face_tiger);
+                    break;
+                case "얼룩말":
+                    characterFace.setImageResource(R.drawable.face_zebra);
+                    break;
+                case "사자":
+                    characterFace.setImageResource(R.drawable.face_lion);
+                    break;
+                default:
+                    characterFace.setImageResource(R.drawable.face_dog);
+                    break;
+            }
+        }
+    }
+
+
     private void checkHouse(View truck) {
         ImageView house1 = findViewById(R.id.house1);
         ImageView house2 = findViewById(R.id.house2);
@@ -202,13 +256,27 @@ public class DeliveryActivity extends UserKeyActivity {
         if (chosenWord.equals(targetWord)) {
             bookmarks++;
             updateBookmarkCount();
+            if (deliverySuccess != null) {
+                deliverySuccess.start();
+            }
             showToast("배달 완료! 책갈피 획득");
+            resetTruckPosition();
             startNewGame();
         } else {
-            showToast("다시 배달해주세요.");
-            truck.setX(initialTruckX);
-            truck.setY(initialTruckY);
+            if (deliveryFailure != null) {
+                deliveryFailure.start();
+            }
+            showToast("다시 배달해주세요");
+            resetTruckPosition();
         }
+    }
+
+    private void resetTruckPosition() {
+        truck.animate()
+                .x(initialTruckX)
+                .y(initialTruckY)
+                .setDuration(400)
+                .start();
     }
 
     private boolean isViewOverlapping(View view1, View view2) {
@@ -243,8 +311,8 @@ public class DeliveryActivity extends UserKeyActivity {
             @Override
             public void onFinish() {
                 timerText.setText("00:00");
+                isGameOver = true;
                 showGameOverDialog();
-                // Game over logic here
             }
         }.start();
     }
@@ -285,9 +353,11 @@ public class DeliveryActivity extends UserKeyActivity {
         playAgainButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                isGameOver = false;
                 bookmarks = 0;
                 startTimer();
                 startNewGame();
+                handler.post(gazeRunnable);
                 alertDialog.dismiss();
             }
         });
@@ -309,15 +379,20 @@ public class DeliveryActivity extends UserKeyActivity {
             tts.stop();
             tts.shutdown();
         }
-
         if (countDownTimer != null) {
             countDownTimer.cancel();
         }
-
         if (gazeTrackerManager != null) {
             gazeTrackerManager.deinitGazeTracker();
         }
-
+        if (deliverySuccess != null) {
+            deliverySuccess.release();
+            deliverySuccess = null;
+        }
+        if (deliveryFailure != null) {
+            deliveryFailure.release();
+            deliveryFailure = null;
+        }
         super.onDestroy();
     }
 
@@ -386,12 +461,15 @@ public class DeliveryActivity extends UserKeyActivity {
     private final Runnable gazeRunnable = new Runnable() {
         @Override
         public void run() {
-            moveTruckTowardsGaze();
-            handler.post(this);
+            if (!isGameOver) {
+                moveTruckTowardsGaze();
+                handler.postDelayed(this, GAZE_UPDATE_INTERVAL);
+            }
         }
     };
 
     private void moveTruckTowardsGaze() {
+        if (isGameOver) return;
         if (lastTime == 0 || System.currentTimeMillis() - lastTime > GAZE_UPDATE_INTERVAL) {
             lastTime = System.currentTimeMillis();
             runOnUiThread(() -> {
@@ -441,13 +519,17 @@ public class DeliveryActivity extends UserKeyActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        gazeTrackerManager.startGazeTracking();
+        if (!isGameOver) {
+            gazeTrackerManager.startGazeTracking();
+            handler.post(gazeRunnable);
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         gazeTrackerManager.stopGazeTracking();
+        handler.removeCallbacks(gazeRunnable);
     }
 
     @Override

@@ -220,7 +220,7 @@ nickname = getUserNickname();
         if (isGranted) {
             permissionGranted();
         } else {
-            showToast("not granted permissions", true);
+            showToast("권한이 없습니다", true);
             finish();
         }
     }
@@ -763,11 +763,11 @@ nickname = getUserNickname();
                 switch (error) {
                     case ERROR_CAMERA_START:
                         // When if camera stream can't start
-                        showToast("ERROR_CAMERA_START ", false);
+                        // showToast("ERROR_CAMERA_START ", false);
                         break;
                     case ERROR_CAMERA_INTERRUPT:
                         // When if camera stream interrupted
-                        showToast("ERROR_CAMERA_INTERRUPT ", false);
+                        // showToast("ERROR_CAMERA_INTERRUPT ", false);
                         break;
                 }
             }
@@ -812,7 +812,7 @@ nickname = getUserNickname();
     private boolean startCalibration() {
       boolean isSuccess = gazeTrackerManager.startCalibration(calibrationType, criteria);
       if (!isSuccess) {
-        showToast("calibration start fail", false);
+        // showToast("calibration start fail", false);
       }
       setViewAtGazeTrackerState();
       return isSuccess;

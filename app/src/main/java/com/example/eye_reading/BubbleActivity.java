@@ -10,6 +10,8 @@ import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -42,7 +44,6 @@ import java.util.Map;
 import java.util.Random;
 
 
-import camp.visual.gazetracker.util.ViewLayoutChecker;
 import visual.camp.sample.view.GazePathView;
 
 public class BubbleActivity extends UserKeyActivity {
@@ -56,8 +57,12 @@ public class BubbleActivity extends UserKeyActivity {
     private int bookmarks = 0;
     private TextToSpeech tts;
     private MediaPlayer bubblePop, bubbleError;
+    private List<View> bubbleViews;
     private List<ImageView> heartImages;
-
+    private Animation shootAnimation;
+    private RelativeLayout characterLayout;
+    private String currentCharacter = "강아지";
+    private ImageView characterImage;
     private GazePathView gazePathView;
     private GazeTrackerManager gazeTrackerManager;
     private final ViewLayoutChecker viewLayoutChecker = new ViewLayoutChecker();
@@ -99,7 +104,7 @@ public class BubbleActivity extends UserKeyActivity {
         });
 
         bubblePop = MediaPlayer.create(this, R.raw.bubble_pop);
-        bubbleError = MediaPlayer.create(this, R.raw.bubble_error);
+        bubbleError = MediaPlayer.create(this, R.raw.error);
 
         ImageView btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> onBackPressed());
@@ -108,10 +113,23 @@ public class BubbleActivity extends UserKeyActivity {
         heartImages.add(findViewById(R.id.heart1));
         heartImages.add(findViewById(R.id.heart2));
         heartImages.add(findViewById(R.id.heart3));
+        bubbleViews = new ArrayList<>();
         gazePathView = findViewById(R.id.gazePathView);
 
         ImageView soundButton = findViewById(R.id.sound);
         soundButton.setOnClickListener(v -> speakOut(targetWord));
+
+        setCharacterImage();
+
+        shootAnimation = new RotateAnimation(
+                0, -10, // fromDegrees, toDegrees
+                Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 1.0f);
+        shootAnimation.setDuration(300);
+        shootAnimation.setRepeatCount(1);
+        shootAnimation.setRepeatMode(Animation.REVERSE);
+        characterLayout = findViewById(R.id.character);
+        characterImage = findViewById(R.id.character_image);
 
         gazeTrackerManager = GazeTrackerManager.getInstance();
 
@@ -140,6 +158,46 @@ public class BubbleActivity extends UserKeyActivity {
         });
     }
 
+    private void setCharacterImage() {
+        if (currentCharacter != null) {
+            switch (currentCharacter) {
+                case "강아지":
+                    characterImage.setImageResource(R.drawable.character_dog);
+                    break;
+                case "돼지":
+                    characterImage.setImageResource(R.drawable.character_pig);
+                    break;
+                case "판다":
+                    characterImage.setImageResource(R.drawable.character_panda);
+                    break;
+                case "원숭이":
+                    characterImage.setImageResource(R.drawable.character_monkey);
+                    break;
+                case "기린":
+                    characterImage.setImageResource(R.drawable.character_giraffe);
+                    break;
+                case "젖소":
+                    characterImage.setImageResource(R.drawable.character_milkcow);
+                    break;
+                case "펭귄":
+                    characterImage.setImageResource(R.drawable.character_penguin);
+                    break;
+                case "호랑이":
+                    characterImage.setImageResource(R.drawable.character_tiger);
+                    break;
+                case "얼룩말":
+                    characterImage.setImageResource(R.drawable.character_zebra);
+                    break;
+                case "사자":
+                    characterImage.setImageResource(R.drawable.character_lion);
+                    break;
+                default:
+                    characterImage.setImageResource(R.drawable.character_dog);
+                    break;
+            }
+        }
+    }
+
     private void startNewGame() {
         Random random = new Random();
         WordCharacterPair selectedPair = wordList.get(random.nextInt(wordList.size()));
@@ -154,7 +212,6 @@ public class BubbleActivity extends UserKeyActivity {
         speakOut(targetWord);
 
         RelativeLayout container = findViewById(R.id.container);
-        container.removeAllViews();
         setupBubbles(container);
     }
 
@@ -171,6 +228,11 @@ public class BubbleActivity extends UserKeyActivity {
         char[] characters = {'ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ',
                 'ㅏ', 'ㅑ', 'ㅓ', 'ㅕ', 'ㅗ', 'ㅛ', 'ㅜ', 'ㅠ', 'ㅡ', 'ㅣ'};
         Random random = new Random();
+
+        for (View view : bubbleViews) {
+            container.removeView(view);
+        }
+        bubbleViews.clear();
 
         images = new ImageView[numBubbles];
 
@@ -193,6 +255,9 @@ public class BubbleActivity extends UserKeyActivity {
             int layoutWidth = container.getWidth();
             int layoutHeight = container.getHeight();
 
+            int characterLayoutWidth = characterLayout.getWidth();
+            int characterLayoutHeight = characterLayout.getHeight();
+
             for (int i = 0; i < numBubbles; i++) {
                 int leftMargin, topMargin;
                 boolean overlaps;
@@ -202,6 +267,13 @@ public class BubbleActivity extends UserKeyActivity {
                     overlaps = false;
                     leftMargin = random.nextInt(layoutWidth - bubbleSizeInPx);
                     topMargin = random.nextInt(layoutHeight - bubbleSizeInPx);
+
+                    if (leftMargin >= characterLayout.getLeft() - bubbleSizeInPx &&
+                            leftMargin <= characterLayout.getLeft() + characterLayoutWidth &&
+                            topMargin >= characterLayout.getTop() - bubbleSizeInPx &&
+                            topMargin <= characterLayout.getTop() + characterLayoutHeight) {
+                        overlaps = true;
+                    }
 
                     for (int[] pos : positions) {
                         int otherLeft = pos[0];
@@ -241,6 +313,8 @@ public class BubbleActivity extends UserKeyActivity {
                 textParams.topMargin = topMargin;
 
                 container.addView(textView, textParams);
+                bubbleViews.add(bubble);
+                bubbleViews.add(textView);
 
                 // Set click listener for the bubble
                 final int index = i;
@@ -279,6 +353,7 @@ public class BubbleActivity extends UserKeyActivity {
                                 .start();
                     })
                     .start();
+            characterLayout.startAnimation(shootAnimation);
         } else {
             textView.setTextColor(Color.RED);
             loseLife();
@@ -297,6 +372,7 @@ public class BubbleActivity extends UserKeyActivity {
                                 .start();
                     })
                     .start();
+            characterLayout.startAnimation(shootAnimation);
         }
     }
 
@@ -305,6 +381,17 @@ public class BubbleActivity extends UserKeyActivity {
             lives--;
             updateHearts();
             if (lives == 0) {
+                gazeTrackerManager.stopGazeTracking();
+                characterLayout.clearAnimation();
+                if (tts != null) {
+                    tts.stop();
+                }
+                if (bubblePop != null) {
+                    bubblePop.stop();
+                }
+                if (bubbleError != null) {
+                    bubbleError.stop();
+                }
                 showGameOverDialog();
             }
         }
@@ -348,6 +435,7 @@ public class BubbleActivity extends UserKeyActivity {
                 updateHearts();
                 startNewGame();
                 alertDialog.dismiss();
+                gazeTrackerManager.startGazeTracking();
             }
         });
 
@@ -396,6 +484,10 @@ public class BubbleActivity extends UserKeyActivity {
         if (bubblePop != null) {
             bubblePop.release();
             bubblePop = null;
+        }
+        if (bubbleError != null) {
+            bubbleError.release();
+            bubbleError = null;
         }
         super.onDestroy();
     }
