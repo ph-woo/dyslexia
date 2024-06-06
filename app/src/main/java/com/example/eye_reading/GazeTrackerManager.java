@@ -219,8 +219,9 @@ public class GazeTrackerManager {
   private final GazeCallback gazeCallback = new GazeCallback() {
     @Override
     public void onGaze(GazeInfo gazeInfo) {
-      for (GazeCallback gazeCallback : gazeCallbacks) {
-        gazeCallback.onGaze(gazeInfo);
+      List<GazeCallback> callbacks = new ArrayList<>(gazeCallbacks);
+      for (int i = 0; i < callbacks.size(); i++) {
+        callbacks.get(i).onGaze(gazeInfo);
       }
     }
   };

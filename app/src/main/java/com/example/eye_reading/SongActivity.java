@@ -86,6 +86,11 @@ public class SongActivity extends UserKeyActivity {
 //            homeIntent.putExtra("USERKEY", userkey);
             startActivity(homeIntent);
         });
+
+        navUser.setOnClickListener(v -> {
+            Intent userIntent = new Intent(SongActivity.this, UserActivity.class);
+            startActivity(userIntent);
+        });
     }
 
     private void loadSongsAndStatus() {

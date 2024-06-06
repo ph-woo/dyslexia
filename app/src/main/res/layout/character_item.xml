@@ -2,8 +2,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="20dp"
-    android:padding="16dp"
-    android:background="@drawable/rounded_basic">
+    android:padding="16dp">
 
     <ImageView
         android:id="@+id/character_image"
@@ -24,7 +23,7 @@
             android:id="@+id/character_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="캐릭터"
+            android:text=""
             android:textSize="30sp"
             android:textColor="@color/brown" />
 
@@ -32,7 +31,7 @@
             android:id="@+id/character_description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="캐릭터 설명"
+            android:text=""
             android:textSize="20sp"
             android:textColor="@android:color/black"
             android:layout_marginTop="4dp" />
@@ -49,7 +48,8 @@
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_gravity="center_vertical"
-            android:src="@drawable/bookmark" />
+            android:src="@drawable/bookmark"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/character_price"
@@ -58,7 +58,8 @@
             android:text="00"
             android:textSize="20sp"
             android:textColor="@android:color/black"
-            android:layout_marginStart="6dp" />
+            android:layout_marginStart="6dp"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/character_status"

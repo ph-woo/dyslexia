@@ -64,7 +64,7 @@ public class DeliveryActivity extends UserKeyActivity {
 
     private GazeTrackerManager gazeTrackerManager;
     private Handler handler;
-    private static final long GAZE_UPDATE_INTERVAL = 20;
+    private static final long GAZE_UPDATE_INTERVAL = 30;
     private float gazeX, gazeY;
     private long lastTime = 0;
     private boolean isGameOver = false;
@@ -506,9 +506,9 @@ public class DeliveryActivity extends UserKeyActivity {
                 float dx = gazeX - (truckX + truck.getWidth() / 2);
                 float dy = gazeY - (truckY + truck.getHeight() / 2);
 
-                if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
-                    float newTruckX = truckX + (dx > 0 ? 8 : -8);
-                    float newTruckY = truckY + (dy > 0 ? 8 : -8);
+                if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+                    float newTruckX = truckX + (dx > 0 ? 6 : -6);
+                    float newTruckY = truckY + (dy > 0 ? 6 : -6);
 
                     truck.setX(newTruckX);
                     truck.setY(newTruckY);

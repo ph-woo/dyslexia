@@ -612,8 +612,8 @@ public class BubbleActivity extends UserKeyActivity {
         soundButton.getLocationOnScreen(soundButtonLocation);
         float soundButtonX = soundButtonLocation[0];
         float soundButtonY = soundButtonLocation[1];
-        float soundButtonWidth = soundButton.getWidth() + 80; //POINT_RADIUS
-        float soundButtonHeight = soundButton.getHeight() + 80;
+        float soundButtonWidth = soundButton.getWidth() + 130; //POINT_RADIUS
+        float soundButtonHeight = soundButton.getHeight() + 130;
 
         if (gazeX >= soundButtonX && gazeX <= soundButtonX + soundButtonWidth && gazeY >= soundButtonY && gazeY <= soundButtonY + soundButtonHeight) {
             if (!gazeStartTimeMap.containsKey(soundButton)) {

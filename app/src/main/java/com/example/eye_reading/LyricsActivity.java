@@ -159,7 +159,6 @@ public class LyricsActivity extends UserKeyActivity {
     }
 
     private void setupGame() {
-
         LinearLayout[] buttonsLayouts = new LinearLayout[lyrics.length];
 
         // 각 레이아웃을 동적으로 찾기 위해 for 루프를 사용합니다.
@@ -288,6 +287,7 @@ public class LyricsActivity extends UserKeyActivity {
         // 현재 액티비티를 다시 시작하여 게임을 초기화
         Intent intent = getIntent();
         finish();
+        gazeTrackerManager.startGazeTracking();
         startActivity(intent);
     }
 
@@ -360,6 +360,8 @@ public class LyricsActivity extends UserKeyActivity {
 
     // 게임 성공 다이얼로그를 표시하는 메서드
     private void showGameSuccessDialog(String songTitle) {
+        gazeTrackerManager.stopGazeTracking();
+
         View dialogView = LayoutInflater.from(this).inflate(R.layout.gameover_dialog, null);
 
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
@@ -379,6 +381,8 @@ public class LyricsActivity extends UserKeyActivity {
         exitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent intent = new Intent(LyricsActivity.this, SongActivity.class);
+                startActivity(intent);
                 finish();
             }
         });
@@ -473,6 +477,9 @@ public class LyricsActivity extends UserKeyActivity {
     }
 
     private void showGameOverDialog() {
+        if (isFinishing() || isDestroyed()) {
+            return;
+        }
         gazeTrackerManager.stopGazeTracking();
 
         View dialogView = LayoutInflater.from(this).inflate(R.layout.gameover_dialog, null);
@@ -498,10 +505,11 @@ public class LyricsActivity extends UserKeyActivity {
         exitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent intent = new Intent(LyricsActivity.this, SongActivity.class);
+                startActivity(intent);
                 finish();
             }
         });
-
         alertDialog.show();
     }
 
@@ -553,6 +561,12 @@ public class LyricsActivity extends UserKeyActivity {
 
     @Override
     protected void onDestroy() {
+        if (gazeTrackerManager != null) {
+            gazeTrackerManager.deinitGazeTracker();
+        }
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
         super.onDestroy();
     }
 

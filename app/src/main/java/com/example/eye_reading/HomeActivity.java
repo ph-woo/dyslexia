@@ -77,9 +77,6 @@ public class HomeActivity extends UserKeyActivity {
             finish();
         }
         fetchUsername(userkey);
-
-
-
       
         currentCharacterImage = findViewById(R.id.character);
 

@@ -121,6 +121,7 @@ public class ShopActivity extends UserKeyActivity {
     @SuppressLint("UseCompatLoadingForDrawables")
     private void addCharacterItems() {
         List<Character> characters = getCharacters();
+        characterContainer.removeAllViews();
 
         for (Character character : characters) {
             RelativeLayout characterLayout = (RelativeLayout) LayoutInflater.from(this)
@@ -151,16 +152,15 @@ public class ShopActivity extends UserKeyActivity {
                     }
                 });
             } else {
+                characterLayout.setBackground(getDrawable(R.drawable.rounded_basic));
                 characterStatus.setVisibility(View.GONE);
                 bookmarkIcon.setVisibility(View.VISIBLE);
                 characterPrice.setText(String.valueOf(character.getPrice()));
                 characterPrice.setVisibility(View.VISIBLE);
                 characterLayout.setOnClickListener(v -> {
                     if (bookmarks >= character.getPrice()) {
-                        System.out.println(bookmarks);
                         showPurchaseDialog(character);
                     } else {
-                        System.out.println(bookmarks);
                         showInsufficientBookmarksDialog();
                     }
                 });
@@ -169,7 +169,6 @@ public class ShopActivity extends UserKeyActivity {
         }
     }
     private void refreshCharacterItems() {
-        characterContainer.removeAllViews();
         addCharacterItems();
     }
 
@@ -260,6 +259,7 @@ public class ShopActivity extends UserKeyActivity {
                         // 오류 처리
                     }
                 });
+                alertDialog.dismiss();
             }
         });
         alertDialog.show();
