@@ -26,7 +26,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends UserKeyActivity {
     private static final String[] PERMISSIONS = new String[]{
             Manifest.permission.CAMERA
     };
@@ -56,16 +56,30 @@ public class HomeActivity extends AppCompatActivity {
 
 
 
-        Intent homeIntent = getIntent();
+//        Intent homeIntent = getIntent();
+//
+//        if (homeIntent != null && homeIntent.hasExtra("USERKEY")) {
+//            userkey = homeIntent.getStringExtra("USERKEY");
+//            Log.d("HomeAct", "Received userkey: " + userkey);
+//        } else {
+//            Log.e("HomeAct", "No userkey provided");
+//        }
 
-        if (homeIntent != null && homeIntent.hasExtra("USERKEY")) {
-            userkey = homeIntent.getStringExtra("USERKEY");
-            Log.d("HomeAct", "Received userkey: " + userkey);
+
+        userkey = getUserId();
+        if (userkey != null) {
+            // userId를 사용하여 필요한 작업 수행
+            Log.d("MainActivity", "User ID: " + userkey);
         } else {
-            Log.e("HomeAct", "No userkey provided");
+            // userId가 null이면 로그인 화면으로 이동
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            finish();
         }
-
         fetchUsername(userkey);
+
+
+
       
         currentCharacterImage = findViewById(R.id.character);
 
@@ -80,6 +94,12 @@ public class HomeActivity extends AppCompatActivity {
         bookmarkCountText = findViewById(R.id.bookmark_count);
 
         nicknameText.setText(nickname);
+//        System.out.println("nikckkk"+nickname);
+//        SharedPreferences sharedPreferences = getSharedPreferences("login_state", MODE_PRIVATE);
+//        SharedPreferences.Editor editor = sharedPreferences.edit();
+//        editor.putString("USERNAME", nickname);
+//        editor.apply();
+
         loadBookmarkCount();
 
         ImageView navHome = findViewById(R.id.nav_home);
@@ -90,8 +110,8 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent shopIntent = new Intent(HomeActivity.this, ShopActivity.class);
-                shopIntent.putExtra("USERNAME", nickname);
-                shopIntent.putExtra("USERKEY", userkey);
+//                shopIntent.putExtra("USERNAME", nickname);
+//                shopIntent.putExtra("USERKEY", userkey);
                 startActivity(shopIntent);
             }
         });
@@ -101,8 +121,8 @@ public class HomeActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent gameIntent = new Intent(HomeActivity.this, GameActivity.class);
                 System.out.println(nickname);
-                gameIntent.putExtra("USERNAME", nickname);
-                gameIntent.putExtra("USERKEY", userkey);
+//                gameIntent.putExtra("USERNAME", nickname);
+//                gameIntent.putExtra("USERKEY", userkey);
                 startActivity(gameIntent);
             }
         });
@@ -111,8 +131,8 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent userIntent = new Intent(HomeActivity.this, UserActivity.class);
-                userIntent.putExtra("USERNAME", nickname);
-                userIntent.putExtra("USERKEY", userkey);
+//                userIntent.putExtra("USERNAME", nickname);
+//                userIntent.putExtra("USERKEY", userkey);
                 startActivity(userIntent);
             }
         });
@@ -207,6 +227,16 @@ public class HomeActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(HomeActivity.this, "username not found", Toast.LENGTH_SHORT).show();
                 }
+                putNickname(nickname);
+            }
+
+
+            private  void  putNickname(String nickname){
+                System.out.println("nikckkk"+nickname);
+                SharedPreferences sharedPreferences = getSharedPreferences("login_state", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("USERNAME", nickname);
+                editor.apply();
             }
 
             @Override

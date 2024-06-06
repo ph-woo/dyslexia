@@ -42,7 +42,7 @@ import camp.visual.gazetracker.callback.InitializationCallback;
 import camp.visual.gazetracker.constant.InitializationErrorType;
 import camp.visual.gazetracker.gaze.GazeInfo;
 
-public class DeliveryActivity extends AppCompatActivity {
+public class DeliveryActivity extends UserKeyActivity {
     private DatabaseReference databaseReference;
     String userKey;
     private List<WordPair> wordList;
@@ -72,15 +72,17 @@ public class DeliveryActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("");
         }
 
-        Intent deliveryIntent = getIntent();
+//        Intent deliveryIntent = getIntent();
+//
+//        if (deliveryIntent != null && deliveryIntent.hasExtra("USERKEY")) {
+//            userKey = deliveryIntent.getStringExtra("USERKEY");
+//
+//            Log.d("HomeAct", "Received userkey: " + userKey);
+//        } else {
+//            Log.e("HomeAct", "No userkey provided");
+//        }
 
-        if (deliveryIntent != null && deliveryIntent.hasExtra("USERKEY")) {
-            userKey = deliveryIntent.getStringExtra("USERKEY");
-
-            Log.d("HomeAct", "Received userkey: " + userKey);
-        } else {
-            Log.e("HomeAct", "No userkey provided");
-        }
+        userKey=getUserId();
 
         tts = new TextToSpeech(this, status -> {
             if (status != TextToSpeech.ERROR) {

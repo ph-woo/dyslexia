@@ -21,7 +21,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class UserActivity extends AppCompatActivity {
+public class UserActivity extends UserKeyActivity {
     private DatabaseReference databaseReference;
     String nickname = "";
     String userkey = "";
@@ -42,6 +42,12 @@ public class UserActivity extends AppCompatActivity {
         SplashScreen.installSplashScreen(this);
         setContentView(R.layout.activity_user);
 
+        userkey = getUserId();
+        nickname = getUserNickname();
+
+        System.out.println("nick"+nickname);
+
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
@@ -50,6 +56,8 @@ public class UserActivity extends AppCompatActivity {
 
         bookmarkCountText = findViewById(R.id.bookmark_count);
         nicknameText = findViewById(R.id.nickname);
+        // TextView에 nickname 값을 설정
+        nicknameText.setText(nickname);
         nicknameEdit = findViewById(R.id.nickname_edit);
         nicknameEditButton = findViewById(R.id.nickname_edit_button);
         nicknameConfirmButton = findViewById(R.id.nickname_confirm_button);
@@ -83,6 +91,8 @@ public class UserActivity extends AppCompatActivity {
                 databaseReference.child("Users").child(userkey).child("username").setValue(newNickname);
                 nickname = newNickname;
                 nicknameText.setText(newNickname);
+
+                saveUsernameState(nickname);
                 nicknameCancelButton.callOnClick();
             }
         });
@@ -136,8 +146,8 @@ public class UserActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent gameIntent = new Intent(UserActivity.this, GameActivity.class);
-                gameIntent.putExtra("USERNAME", nickname);
-                gameIntent.putExtra("USERKEY", userkey);
+//                gameIntent.putExtra("USERNAME", nickname);
+//                gameIntent.putExtra("USERKEY", userkey);
                 startActivity(gameIntent);
             }
         });
@@ -152,17 +162,25 @@ public class UserActivity extends AppCompatActivity {
     }
 
     private void logoutUser() {
-        saveLoginState(false);
+        clearLoginState();
 
         Intent loginIntent = new Intent(this, LoginActivity.class);
         startActivity(loginIntent);
         finish();
     }
 
-    private void saveLoginState(boolean isLoggedIn) {
+    private void clearLoginState() {
         SharedPreferences sharedPreferences = getSharedPreferences("login_state", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("isLoggedIn", isLoggedIn);
+        editor.clear(); // 모든 데이터 제거
         editor.apply();
     }
+
+    private void saveUsernameState(String nickname) {
+        SharedPreferences sharedPreferences = getSharedPreferences("login_state", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("USERNAME", nickname);
+        editor.apply();
+    }
+
 }

@@ -20,9 +20,9 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SongActivity extends AppCompatActivity {
+public class SongActivity extends UserKeyActivity {
 
-    String nickname = "";
+//    String nickname = "";
     String userkey = "";
     DatabaseReference database;
 
@@ -31,20 +31,20 @@ public class SongActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_song);
 
-        Intent gameIntent = getIntent();
-        if (gameIntent != null && gameIntent.hasExtra("USERNAME")) {
-            nickname = gameIntent.getStringExtra("USERNAME");
-            Log.d("HomeAct", "Received nickname: " + nickname);
-        } else {
-            Log.e("HomeAct", "No nickname provided");
-        }
-
-        if (gameIntent != null && gameIntent.hasExtra("USERKEY")) {
-            userkey = gameIntent.getStringExtra("USERKEY");
-            Log.d("HomeAct", "Received userkey: " + userkey);
-        } else {
-            Log.e("HomeAct", "No userkey provided");
-        }
+//        Intent gameIntent = getIntent();
+//        if (gameIntent != null && gameIntent.hasExtra("USERNAME")) {
+//            nickname = gameIntent.getStringExtra("USERNAME");
+//            Log.d("HomeAct", "Received nickname: " + nickname);
+//        } else {
+//            Log.e("HomeAct", "No nickname provided");
+//        }
+//
+//        if (gameIntent != null && gameIntent.hasExtra("USERKEY")) {
+//            userkey = gameIntent.getStringExtra("USERKEY");
+//            Log.d("HomeAct", "Received userkey: " + userkey);
+//        } else {
+//            Log.e("HomeAct", "No userkey provided");
+//        }
 
 //        Intent intent = getIntent();
 //        if (intent != null && intent.hasExtra("USERNAME")) {
@@ -60,6 +60,9 @@ public class SongActivity extends AppCompatActivity {
 //        } else {
 //            Log.e("HomeAct", "No userkey provided");
 //        }
+
+        userkey = getUserId();
+//nickname = getUserNickname();
 
 
         if (getSupportActionBar() != null) {
@@ -79,8 +82,8 @@ public class SongActivity extends AppCompatActivity {
 
         navHome.setOnClickListener(v -> {
             Intent homeIntent = new Intent(SongActivity.this, HomeActivity.class);
-            homeIntent.putExtra("USERNAME", nickname);
-            homeIntent.putExtra("USERKEY", userkey);
+//            homeIntent.putExtra("USERNAME", nickname);
+//            homeIntent.putExtra("USERKEY", userkey);
             startActivity(homeIntent);
         });
     }
@@ -188,8 +191,8 @@ public class SongActivity extends AppCompatActivity {
                 String songTitle = ((Button) v).getText().toString();
                 Intent intent = new Intent(SongActivity.this, LyricsActivity.class);
                 intent.putExtra("SONG_TITLE", songTitle);
-                intent.putExtra("USERNAME", nickname);
-                intent.putExtra("USERKEY", userkey);
+//                intent.putExtra("USERNAME", nickname);
+//                intent.putExtra("USERKEY", userkey);
                 startActivity(intent);
             });
 

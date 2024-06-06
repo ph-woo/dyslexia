@@ -38,10 +38,10 @@ import camp.visual.gazetracker.state.EyeMovementState;
 import camp.visual.gazetracker.util.ViewLayoutChecker;
 import visual.camp.sample.view.GazePathView;
 
-public class LyricsActivity extends AppCompatActivity {
+public class LyricsActivity extends UserKeyActivity {
 
     String songTitle = null; // 변수를 먼저 선언하고 초기화
-    String nickname = null; // 변수를 먼저 선언하고 초기화
+//    String nickname = null; // 변수를 먼저 선언하고 초기화
     String userkey = null; // 변수를 먼저 선언하고 초기화
 
     private static final String TAG = LyricsActivity.class.getSimpleName();
@@ -83,13 +83,15 @@ public class LyricsActivity extends AppCompatActivity {
         } else {
             Log.e("EyeTracking", "No song title provided");
         }
-        if (intent != null && intent.hasExtra("USERKEY")) {
-           userkey = intent.getStringExtra("USERKEY");
-            // songTitle을 사용하여 작업 수행
-            Log.d("EyeTracking", "Received USERKEY: " + userkey);
-        } else {
-            Log.e("EyeTracking", "No USERKEY provided");
-        }
+
+        userkey = getUserId();
+//        if (intent != null && intent.hasExtra("USERKEY")) {
+//           userkey = intent.getStringExtra("USERKEY");
+//            // songTitle을 사용하여 작업 수행
+//            Log.d("EyeTracking", "Received USERKEY: " + userkey);
+//        } else {
+//            Log.e("EyeTracking", "No USERKEY provided");
+//        }
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
@@ -333,6 +335,12 @@ public class LyricsActivity extends AppCompatActivity {
             case "시":
                 soundResId = R.raw.si;
                 break;
+            case "또":
+                soundResId = R.raw.highdo;
+                break;
+            case "렐":
+                soundResId = R.raw.highdo;
+                break;
             case "error":
                 soundResId = R.raw.error;
                 break;
@@ -442,8 +450,8 @@ public class LyricsActivity extends AppCompatActivity {
 
         // Activity 전환
         Intent intent = new Intent(LyricsActivity.this, GameActivity.class);
-        intent.putExtra("USERNAME", nickname);
-        intent.putExtra("USERKEY", userkey);
+//        intent.putExtra("USERNAME", nickname);
+//        intent.putExtra("USERKEY", userkey);
         startActivity(intent);
         finish(); // Activity 종료
     }
@@ -485,8 +493,8 @@ public class LyricsActivity extends AppCompatActivity {
                 dialog.dismiss();
                 // Activity 전환
                 Intent intent = new Intent(LyricsActivity.this, GameActivity.class);
-                intent.putExtra("USERNAME", nickname);
-                intent.putExtra("USERKEY", userkey);
+//                intent.putExtra("USERNAME", nickname);
+//                intent.putExtra("USERKEY", userkey);
                 startActivity(intent);
                 finish(); // Activity 종료
             }

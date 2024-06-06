@@ -27,7 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ShopActivity extends AppCompatActivity {
+public class ShopActivity extends UserKeyActivity {
     private LinearLayout characterContainer;
     private Set<String> ownedCharacters = new HashSet<>();
     private String currentCharacter;
@@ -36,7 +36,7 @@ public class ShopActivity extends AppCompatActivity {
 
     private TextView bookmarkCountText;
 
-    String nickname="";
+
     String userkey="";
 
 
@@ -52,21 +52,32 @@ public class ShopActivity extends AppCompatActivity {
 
 
 
-        Intent shopIntent = getIntent();
-        if (shopIntent != null && shopIntent.hasExtra("USERNAME")) {
-            nickname= shopIntent.getStringExtra("USERNAME");
+//        Intent shopIntent = getIntent();
+//        if (shopIntent != null && shopIntent.hasExtra("USERNAME")) {
+//            nickname= shopIntent.getStringExtra("USERNAME");
+//
+//            Log.d("HomeAct", "Received nickname: " + nickname);
+//        } else {
+//            Log.e("HomeAct", "No nickname provided");
+//        }
+//
+//        if (shopIntent != null && shopIntent.hasExtra("USERKEY")) {
+//            userkey= shopIntent.getStringExtra("USERKEY");
+//
+//            Log.d("HomeAct", "Received userkey: " + userkey);
+//        } else {
+//            Log.e("HomeAct", "No userkey provided");
+//        }
 
-            Log.d("HomeAct", "Received nickname: " + nickname);
+        userkey = getUserId();
+        if (userkey != null) {
+            // userId를 사용하여 필요한 작업 수행
+            Log.d("MainActivity", "User ID: " + userkey);
         } else {
-            Log.e("HomeAct", "No nickname provided");
-        }
-
-        if (shopIntent != null && shopIntent.hasExtra("USERKEY")) {
-            userkey= shopIntent.getStringExtra("USERKEY");
-
-            Log.d("HomeAct", "Received userkey: " + userkey);
-        } else {
-            Log.e("HomeAct", "No userkey provided");
+            // userId가 null이면 로그인 화면으로 이동
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            finish();
         }
 
         if (getSupportActionBar() != null) {
@@ -76,7 +87,7 @@ public class ShopActivity extends AppCompatActivity {
         ImageView btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> {
             Intent HomeIntent = new Intent(ShopActivity.this, HomeActivity.class);
-            HomeIntent.putExtra("USERNAME", nickname);
+//            HomeIntent.putExtra("USERNAME", nickname);
             HomeIntent.putExtra("USERKEY", userkey);
             startActivity(HomeIntent);
         });

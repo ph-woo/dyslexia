@@ -96,7 +96,7 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("login_state", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("isLoggedIn", isLoggedIn);
-        editor.putString("userId", user.getUid());
+        editor.putString("USERKEY", user.getUid());
         editor.apply();
     }
 
@@ -108,7 +108,7 @@ public class LoginActivity extends AppCompatActivity {
         if (isLoggedIn) {
             // 로그인 상태가 저장되어 있다면 홈 화면으로 이동
             Intent homeIntent = new Intent(this, HomeActivity.class);
-            homeIntent.putExtra("USERKEY", user.getUid());;
+//            homeIntent.putExtra("USERKEY", user.getUid());;
             startActivity(homeIntent);
             finish(); // 현재 액티비티 종료
         }
