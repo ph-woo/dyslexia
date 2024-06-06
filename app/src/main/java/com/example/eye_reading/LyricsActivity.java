@@ -341,7 +341,7 @@ public class LyricsActivity extends UserKeyActivity {
                 soundResId = R.raw.highdo;
                 break;
             case "렐":
-                soundResId = R.raw.highdo;
+                soundResId = R.raw.highre;
                 break;
             case "error":
                 soundResId = R.raw.error;
@@ -392,7 +392,7 @@ public class LyricsActivity extends UserKeyActivity {
             a = 2;
         }else if (songTitle.equals("달 달 무슨달")) {
             a = 3;
-        }else if (songTitle.equals("릿자로 끝나는 말은")) {
+        }else if (songTitle.equals("릿자로 끝나는")) {
             a = 4;
         }else if (songTitle.equals("비행기")) {
             a = 5;

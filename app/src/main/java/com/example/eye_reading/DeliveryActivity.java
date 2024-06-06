@@ -50,7 +50,7 @@ public class DeliveryActivity extends UserKeyActivity {
     private List<WordPair> wordList;
     private String targetWord;
     private List<String> candidateWords;
-    private String currentCharacter = "강아지";
+    private String currentCharacter = getUserCurrentCharacter();
     private int bookmarks = 0;
     private TextToSpeech tts;
     private MediaPlayer deliverySuccess, deliveryFailure;

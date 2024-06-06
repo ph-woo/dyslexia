@@ -16,4 +16,9 @@ public class UserKeyActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("login_state", MODE_PRIVATE);
         return sharedPreferences.getString("USERNAME", null);
     }
+
+    protected String getUserCurrentCharacter() {
+        SharedPreferences sharedPreferences = getSharedPreferences("login_state", MODE_PRIVATE);
+        return sharedPreferences.getString("CURRENTCHARACTER", null);
+    }
 }
