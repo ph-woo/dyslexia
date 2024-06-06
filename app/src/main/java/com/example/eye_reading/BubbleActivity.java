@@ -62,7 +62,7 @@ public class BubbleActivity extends UserKeyActivity {
     private List<ImageView> heartImages;
     private Animation shootAnimation;
     private RelativeLayout characterLayout;
-    private String currentCharacter = "강아지";
+    private String currentCharacter = getUserCurrentCharacter();
     private ImageView characterImage;
     private GazePathView gazePathView;
     private GazeTrackerManager gazeTrackerManager;

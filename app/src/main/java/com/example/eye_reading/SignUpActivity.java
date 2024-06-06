@@ -1,6 +1,7 @@
 package com.example.eye_reading;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -124,6 +125,10 @@ public class SignUpActivity extends AppCompatActivity {
             mDatabase.child("Users").child(userId).child("bookmarkcount").setValue(0);
             mDatabase.child("Users").child(userId).child("currentCharacter").setValue("강아지");
             mDatabase.child("Users").child(userId).child("characters").setValue(characters);
+            SharedPreferences sharedPreferences = getSharedPreferences("login_state", MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("CURRENTCHARACTER", "강아지");
+            editor.apply();
 
             Intent gameIntent = new Intent(SignUpActivity.this, LoginActivity.class);
 

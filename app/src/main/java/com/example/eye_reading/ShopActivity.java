@@ -3,6 +3,7 @@ package com.example.eye_reading;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -409,6 +410,11 @@ public class ShopActivity extends UserKeyActivity {
     private void updateCurrentCharacterInfo() {
         if (currentCharacter != null) {
             Character character = getCharacterByName(currentCharacter);
+            SharedPreferences sharedPreferences = getSharedPreferences("login_state", MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+
+            editor.putString("CURRENTCHARACTER", String.valueOf(character));
+            editor.apply();
             if (character != null) {
                 currentCharacterImage.setImageResource(character.getImageResId());
                 currentCharacterName.setText(character.getName());
