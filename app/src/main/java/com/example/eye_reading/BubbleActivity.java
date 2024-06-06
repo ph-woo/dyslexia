@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.Random;
 
 
+import camp.visual.gazetracker.util.ViewLayoutChecker;
 import visual.camp.sample.view.GazePathView;
 
 public class BubbleActivity extends UserKeyActivity {
@@ -75,6 +76,7 @@ public class BubbleActivity extends UserKeyActivity {
 
     private ImageView[] images;
 
+    private ImageView soundButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,7 +118,7 @@ public class BubbleActivity extends UserKeyActivity {
         bubbleViews = new ArrayList<>();
         gazePathView = findViewById(R.id.gazePathView);
 
-        ImageView soundButton = findViewById(R.id.sound);
+        soundButton = findViewById(R.id.sound);
         soundButton.setOnClickListener(v -> speakOut(targetWord));
 
         setCharacterImage();
@@ -581,6 +583,30 @@ public class BubbleActivity extends UserKeyActivity {
         }
 
         long currentTime = System.currentTimeMillis();
+
+        // 사운드 버튼에 대한 응시 처리 시작
+        int[] soundButtonLocation = new int[2];
+        soundButton.getLocationOnScreen(soundButtonLocation);
+        float soundButtonX = soundButtonLocation[0];
+        float soundButtonY = soundButtonLocation[1];
+        float soundButtonWidth = soundButton.getWidth() + 80; //POINT_RADIUS
+        float soundButtonHeight = soundButton.getHeight() + 80;
+
+        if (gazeX >= soundButtonX && gazeX <= soundButtonX + soundButtonWidth && gazeY >= soundButtonY && gazeY <= soundButtonY + soundButtonHeight) {
+            if (!gazeStartTimeMap.containsKey(soundButton)) {
+                gazeStartTimeMap.put(soundButton, currentTime);
+            } else {
+                long gazeDuration = currentTime - gazeStartTimeMap.get(soundButton);
+                if (gazeDuration >= GAZE_HOLD_DURATION) {
+                    runOnUiThread(() -> soundButton.performClick());
+                    gazeStartTimeMap.remove(soundButton); // 시선이 유지된 후 맵에서 제거
+                }
+            }
+        } else {
+            gazeStartTimeMap.remove(soundButton); // 시선이 벗어나면 맵에서 제거
+        }
+        // 사운드 버튼에 대한 응시 처리 끝
+
         for (ImageView imageView : images) {
             if (imageView == null) continue;
             int[] location = new int[2];
@@ -597,13 +623,7 @@ public class BubbleActivity extends UserKeyActivity {
                 } else {
                     long gazeDuration = currentTime - gazeStartTimeMap.get(imageView);
                     if (gazeDuration >= GAZE_HOLD_DURATION) {
-                        // 메인 스레드에서 UI 업데이트 수행
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                imageView.performClick();
-                            }
-                        });
+                        runOnUiThread(() -> imageView.performClick());
                         gazeStartTimeMap.remove(imageView); // 시선이 유지된 후 맵에서 제거
                     }
                 }

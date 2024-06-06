@@ -41,6 +41,7 @@ import camp.visual.gazetracker.GazeTracker;
 import camp.visual.gazetracker.callback.GazeCallback;
 import camp.visual.gazetracker.callback.InitializationCallback;
 import camp.visual.gazetracker.constant.InitializationErrorType;
+import camp.visual.gazetracker.filter.OneEuroFilterManager;
 import camp.visual.gazetracker.gaze.GazeInfo;
 
 public class DeliveryActivity extends UserKeyActivity {
@@ -63,10 +64,11 @@ public class DeliveryActivity extends UserKeyActivity {
 
     private GazeTrackerManager gazeTrackerManager;
     private Handler handler;
-    private static final long GAZE_UPDATE_INTERVAL = 135; // 0.135초
+    private static final long GAZE_UPDATE_INTERVAL = 20;
     private float gazeX, gazeY;
     private long lastTime = 0;
     private boolean isGameOver = false;
+    private OneEuroFilterManager oneEuroFilterManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -237,19 +239,22 @@ public class DeliveryActivity extends UserKeyActivity {
         }
     }
 
-
-    private void checkHouse(View truck) {
+    private boolean checkHouse(View truck) {
         ImageView house1 = findViewById(R.id.house1);
         ImageView house2 = findViewById(R.id.house2);
         ImageView house3 = findViewById(R.id.house3);
 
         if (isViewOverlapping(truck, house1)) {
             handleHouseDelivery(house1Text.getText().toString());
+            return true;
         } else if (isViewOverlapping(truck, house2)) {
             handleHouseDelivery(house2Text.getText().toString());
+            return true;
         } else if (isViewOverlapping(truck, house3)) {
             handleHouseDelivery(house3Text.getText().toString());
+            return true;
         }
+        return false;
     }
 
     private void handleHouseDelivery(String chosenWord) {
@@ -259,15 +264,15 @@ public class DeliveryActivity extends UserKeyActivity {
             if (deliverySuccess != null) {
                 deliverySuccess.start();
             }
-            showToast("배달 완료! 책갈피 획득");
-            resetTruckPosition();
+            truck.setX(initialTruckX);
+            truck.setY(initialTruckY);
             startNewGame();
         } else {
             if (deliveryFailure != null) {
                 deliveryFailure.start();
             }
-            showToast("다시 배달해주세요");
             resetTruckPosition();
+            truckMoving = false;
         }
     }
 
@@ -463,7 +468,7 @@ public class DeliveryActivity extends UserKeyActivity {
         public void run() {
             if (!isGameOver) {
                 moveTruckTowardsGaze();
-                handler.postDelayed(this, GAZE_UPDATE_INTERVAL);
+                handler.post(this);
             }
         }
     };
@@ -479,21 +484,18 @@ public class DeliveryActivity extends UserKeyActivity {
                 float dx = gazeX - (truckX + truck.getWidth() / 2);
                 float dy = gazeY - (truckY + truck.getHeight() / 2);
 
-                if (Math.abs(dx) > 30 || Math.abs(dy) > 30) {
-                    float newTruckX = truckX + (dx > 0 ? 30 : -30);
-                    float newTruckY = truckY + (dy > 0 ? 30 : -30);
+                if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+                    float newTruckX = truckX + (dx > 0 ? 8 : -8);
+                    float newTruckY = truckY + (dy > 0 ? 8 : -8);
 
-                    ObjectAnimator animatorX = ObjectAnimator.ofFloat(truck, "x", truckX, newTruckX);
-                    ObjectAnimator animatorY = ObjectAnimator.ofFloat(truck, "y", truckY, newTruckY);
-
-                    animatorX.setDuration(GAZE_UPDATE_INTERVAL);
-                    animatorY.setDuration(GAZE_UPDATE_INTERVAL);
-
-                    animatorX.start();
-                    animatorY.start();
+                    truck.setX(newTruckX);
+                    truck.setY(newTruckY);
                 }
 
-                checkHouse(truck);
+                if (checkHouse(truck)) {
+                    truck.setX(initialTruckX);
+                    truck.setY(initialTruckY);
+                }
             });
         }
     }
@@ -502,6 +504,7 @@ public class DeliveryActivity extends UserKeyActivity {
         @Override
         public void onInitialized(GazeTracker gazeTracker, InitializationErrorType error) {
             if (gazeTracker != null) {
+                oneEuroFilterManager = new OneEuroFilterManager(2);
                 gazeTrackerManager.setGazeTrackerCallbacks(gazeCallback);
                 gazeTrackerManager.startGazeTracking();
             } else {
@@ -509,6 +512,26 @@ public class DeliveryActivity extends UserKeyActivity {
             }
         }
     };
+
+    private void stopGazeTrackingTemporarily(long duration) {
+        try {
+            if (gazeTrackerManager.isTracking()) {
+                gazeTrackerManager.stopGazeTracking();
+            }
+
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                try {
+                    if (!gazeTrackerManager.isTracking()) {
+                        gazeTrackerManager.startGazeTracking();
+                    }
+                } catch (IllegalStateException e) {
+                    Log.e("GazeTracker", "에러 트래킹 재시작: 카메라 이미 닫힘.", e);
+                }
+            }, duration);
+        } catch (IllegalStateException e) {
+            Log.e("GazeTracker", "트래킹 멈춤: 카메라 이미 닫힘.", e);
+        }
+    }
 
     @Override
     protected void onStart() {
