@@ -94,7 +94,7 @@
     <RelativeLayout
         android:id="@+id/parent_guide"
         android:layout_width="wrap_content"
-        android:layout_height="90dp"
+        android:layout_height="wrap_content"
         android:layout_below="@id/nickname_info"
         android:layout_above="@id/logoutButton"
         android:layout_marginTop="30dp"
@@ -151,7 +151,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="10dp"
-                android:text="아이리딩은 난독증을 가진 아이들의 개선 훈련을 도와주는 앱입니다.\n총 세 가지의 게임이 있습니다.\n\n1. 음운 인식 훈련\n2. 파닉스 훈련\n3. 시각 집중력 훈련"
+                android:text="아이리딩은 난독증을 가진 아이들의 개선 훈련을 도와주는 앱입니다.\n세 가지 난독증 훈련을 각각 게임으로 구성했습니다.\n\n1. 비눗방울 팡팡 - 음운 인식 훈련\n2. 나는야 배달부 - 파닉스 훈련\n3. 눈으로 불러요 - 시각 집중력 훈련\n\n각 게임을 시작하기 전에는 시선 교정 과정을 반드시 거쳐야 합니다. 빨간 점을 다섯 번 바라보는 과정을 통해 사용자의 시선을 파악합니다. 시선 교정 과정을 아이들에게 지도 부탁드립니다.\n어플을 사용할 때는 거치대를 이용하여 핸드폰을 고정해놓으면 더욱 좋습니다."
                 android:textSize="20sp"
                 android:textColor="@android:color/black" />
         </ScrollView>

@@ -6,7 +6,9 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -350,8 +352,28 @@ public class LyricsActivity extends AppCompatActivity {
 
     // 게임 성공 다이얼로그를 표시하는 메서드
     private void showGameSuccessDialog(String songTitle) {
-        Toast.makeText(this, "게임 성공!", Toast.LENGTH_SHORT).show();
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.gameover_dialog, null);
 
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setView(dialogView);
+        builder.setCancelable(false);
+        android.app.AlertDialog alertDialog = builder.create();
+
+        TextView title = dialogView.findViewById(R.id.title);
+        TextView bookmarkCountTextView = dialogView.findViewById(R.id.bookmark_count);
+        title.setText("게임 성공");
+        bookmarkCountTextView.setText("10개 획득");
+
+        Button playAgainButton = dialogView.findViewById(R.id.play_again_btn);
+        playAgainButton.setVisibility(View.GONE);
+
+        Button exitButton = dialogView.findViewById(R.id.exit_btn);
+        exitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         int a = -1;
         if (songTitle.equals("곰세마리")) {
@@ -440,60 +462,40 @@ public class LyricsActivity extends AppCompatActivity {
             }
         });
 
-        // Activity 전환
-        Intent intent = new Intent(LyricsActivity.this, GameActivity.class);
-        intent.putExtra("USERNAME", nickname);
-        intent.putExtra("USERKEY", userkey);
-        startActivity(intent);
-        finish(); // Activity 종료
+        alertDialog.show();
     }
 
-
-
-
-
-
-
-//    // 게임 오버 다이얼로그를 표시하는 메서드를 확인
-//    private void showGameOverDialog() {
-//        new AlertDialog.Builder(this)
-//                .setTitle("Game Over")
-//                .setMessage("You have completed the game.")
-//                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        // 다이얼로그가 닫힐 때 Activity를 종료하거나 다른 동작을 수행
-//                        finish(); // Activity 종료
-//                    }
-//                })
-//                .show();
-//    }
-
     private void showGameOverDialog() {
-        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
-        builder.setTitle("Game Over!");
-        builder.setMessage("게임 오버!").setCancelable(false);
+        gazeTrackerManager.stopGazeTracking();
 
-        builder.setPositiveButton("다시하기", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                dialog.dismiss();
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.gameover_dialog, null);
+
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setView(dialogView);
+        builder.setCancelable(false);
+        android.app.AlertDialog alertDialog = builder.create();
+
+        TextView bookmarkCountTextView = dialogView.findViewById(R.id.bookmark_count);
+        bookmarkCountTextView.setText("획득 실패");
+
+        Button playAgainButton = dialogView.findViewById(R.id.play_again_btn);
+        playAgainButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.dismiss();
                 restartGame();
             }
         });
 
-        builder.setNegativeButton("게임창으로 가기", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                dialog.dismiss();
-                // Activity 전환
-                Intent intent = new Intent(LyricsActivity.this, GameActivity.class);
-                intent.putExtra("USERNAME", nickname);
-                intent.putExtra("USERKEY", userkey);
-                startActivity(intent);
-                finish(); // Activity 종료
+        Button exitButton = dialogView.findViewById(R.id.exit_btn);
+        exitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
             }
         });
 
-        AlertDialog alert = builder.create();
-        alert.show();
+        alertDialog.show();
     }
 
     private void startTimer() {
@@ -508,7 +510,6 @@ public class LyricsActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
                 showGameOverDialog();
-                // Game over logic here
             }
         }.start();
     }

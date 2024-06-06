@@ -55,11 +55,33 @@
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="20dp"
-        android:layout_below="@id/top_bar"
-        android:id="@+id/container">
+        android:layout_below="@id/top_bar">
+
+        <RelativeLayout
+            android:id="@+id/character"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true">
+
+            <ImageView
+                android:id="@+id/character_image"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@drawable/character_dog" />
+
+            <ImageView
+                android:id="@+id/gun"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_marginTop="42dp"
+                android:layout_marginLeft="58dp"
+                android:src="@drawable/gun" />
+        </RelativeLayout>
     </RelativeLayout>
 
     <visual.camp.sample.view.GazePathView

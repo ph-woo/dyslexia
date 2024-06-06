@@ -157,7 +157,7 @@ public class HomeActivity extends AppCompatActivity {
         if (isGranted) {
             permissionGranted();
         } else {
-            showToast("카메라 권한이 없습니다.", true);
+            showToast("카메라 권한이 없습니다", true);
             finish();
         }
     }
@@ -245,47 +245,36 @@ public class HomeActivity extends AppCompatActivity {
             switch (currentCharacter) {
                 case "강아지":
                     currentCharacterImage.setImageResource(R.drawable.character_dog);
-
                     break;
                 case "돼지":
                     currentCharacterImage.setImageResource(R.drawable.character_pig);
-
                     break;
                 case "판다":
                     currentCharacterImage.setImageResource(R.drawable.character_panda);
-
                     break;
                 case "원숭이":
                     currentCharacterImage.setImageResource(R.drawable.character_monkey);
-
                     break;
                 case "기린":
                     currentCharacterImage.setImageResource(R.drawable.character_giraffe);
-
                     break;
                 case "젖소":
                     currentCharacterImage.setImageResource(R.drawable.character_milkcow);
-
                     break;
                 case "펭귄":
                     currentCharacterImage.setImageResource(R.drawable.character_penguin);
-
                     break;
                 case "호랑이":
                     currentCharacterImage.setImageResource(R.drawable.character_tiger);
-
                     break;
                 case "얼룩말":
                     currentCharacterImage.setImageResource(R.drawable.character_zebra);
-
                     break;
                 case "사자":
                     currentCharacterImage.setImageResource(R.drawable.character_lion);
-
                     break;
                 default:
                     currentCharacterImage.setImageResource(R.drawable.character_dog);
-
                     break;
             }
         }
