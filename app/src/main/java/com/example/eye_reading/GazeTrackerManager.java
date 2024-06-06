@@ -38,7 +38,7 @@ public class GazeTrackerManager {
 
   GazeTracker gazeTracker = null;
   // TODO: change licence key
-  String SEESO_LICENSE_KEY = "dev_osljunf7ub4nb4mqgmcelajmfni8thnnsfnq29ob";
+  String SEESO_LICENSE_KEY = "dev_0wfutv414kjrh56rygsmbrnzjforpctgqtvdsgcq";
 
   static public GazeTrackerManager makeNewInstance(Context context) {
     if (mInstance != null) {
@@ -219,8 +219,9 @@ public class GazeTrackerManager {
   private final GazeCallback gazeCallback = new GazeCallback() {
     @Override
     public void onGaze(GazeInfo gazeInfo) {
-      for (GazeCallback gazeCallback : gazeCallbacks) {
-        gazeCallback.onGaze(gazeInfo);
+      List<GazeCallback> callbacks = new ArrayList<>(gazeCallbacks);
+      for (int i = 0; i < callbacks.size(); i++) {
+        callbacks.get(i).onGaze(gazeInfo);
       }
     }
   };

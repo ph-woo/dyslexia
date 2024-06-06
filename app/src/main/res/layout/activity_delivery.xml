@@ -4,12 +4,13 @@
     android:background="@color/background_color"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:keepScreenOn="true"
     tools:context=".DeliveryActivity">
 
     <RelativeLayout
+        android:id="@+id/top_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/top_bar"
         android:padding="20dp">
 
         <ImageView
@@ -54,23 +55,37 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/top_bar">
+        android:layout_below="@id/top_bar"
+        android:layout_marginTop="0dp">
 
-        <ImageView
+        <RelativeLayout
             android:id="@+id/truck"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginStart="20dp"
-            android:translationZ="10dp"
-            android:src="@drawable/truck" />
+            android:translationZ="10dp">
+
+            <ImageView
+                android:id="@+id/character_face"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginLeft="16dp" />
+
+            <ImageView
+                android:id="@+id/bike"
+                android:layout_width="80dp"
+                android:layout_height="60dp"
+                android:layout_marginTop="36dp"
+                android:src="@drawable/bike" />
+        </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:layout_marginEnd="20dp"
-            android:layout_marginTop="20dp">
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp">
 
             <ImageView
                 android:id="@+id/house1"
@@ -84,7 +99,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="30dp"
-                android:text="단어"
+                android:text=""
                 android:textColor="@android:color/black"
                 android:textSize="30sp" />
         </RelativeLayout>
@@ -93,8 +108,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:layout_marginEnd="20dp"
-            android:layout_centerVertical="true">
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="20dp">
 
             <ImageView
                 android:id="@+id/house2"
@@ -108,7 +123,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="30dp"
-                android:text="단어"
+                android:text=""
                 android:textColor="@android:color/black"
                 android:textSize="30sp" />
         </RelativeLayout>
@@ -133,7 +148,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="30dp"
-                android:text="단어"
+                android:text=""
                 android:textColor="@android:color/black"
                 android:textSize="30sp" />
         </RelativeLayout>

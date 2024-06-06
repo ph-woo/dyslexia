@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        gazeTrackerManager.removeCameraPreview(preview);
+        //gazeTrackerManager.removeCameraPreview(preview);
 
         gazeTrackerManager.removeCallbacks(gazeCallback, calibrationCallback, statusCallback, userStatusCallback);
         Log.i(TAG, "onStop");
@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
         if (isGranted) {
             permissionGranted();
         } else {
-            showToast("not granted permissions", true);
+            showToast("권한이 없습니다", true);
             finish();
         }
     }
@@ -792,7 +792,7 @@ public class MainActivity extends AppCompatActivity {
             // When calibration is finished, calibration data is stored to SharedPreference
 
             hideCalibrationView();
-            showToast("calibrationFinished", true);
+            showToast("시선 교정 완료", true);
         }
     };
 
@@ -814,11 +814,11 @@ public class MainActivity extends AppCompatActivity {
                 switch (error) {
                     case ERROR_CAMERA_START:
                         // When if camera stream can't start
-                        showToast("ERROR_CAMERA_START ", false);
+                        // showToast("ERROR_CAMERA_START ", false);
                         break;
                     case ERROR_CAMERA_INTERRUPT:
                         // When if camera stream interrupted
-                        showToast("ERROR_CAMERA_INTERRUPT ", false);
+                        // showToast("ERROR_CAMERA_INTERRUPT ", false);
                         break;
                 }
             }
@@ -862,7 +862,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean startCalibration() {
       boolean isSuccess = gazeTrackerManager.startCalibration(calibrationType, criteria);
       if (!isSuccess) {
-        showToast("calibration start fail", false);
+        // showToast("calibration start fail", false);
       }
       setViewAtGazeTrackerState();
       return isSuccess;
@@ -885,16 +885,16 @@ public class MainActivity extends AppCompatActivity {
       LoadCalibrationResult result = gazeTrackerManager.loadCalibrationData();
       switch (result) {
         case SUCCESS:
-          showToast("setCalibrationData success", false);
+          // showToast("setCalibrationData success", false);
           break;
         case FAIL_DOING_CALIBRATION:
-          showToast("calibrating", false);
+          // showToast("calibrating", false);
           break;
         case FAIL_NO_CALIBRATION_DATA:
-          showToast("Calibration data is null", true);
+          // showToast("Calibration data is null", true);
           break;
         case FAIL_HAS_NO_TRACKER:
-          showToast("No tracker has initialized", true);
+          // showToast("No tracker has initialized", true);
           break;
       }
       setViewAtGazeTrackerState();

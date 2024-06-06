@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.provider.Settings;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
@@ -26,6 +27,7 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.ContextCompat;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import camp.visual.gazetracker.GazeTracker;
@@ -73,6 +75,7 @@ public class EyeTracking extends AppCompatActivity {
     private long btnStopCalibrationStartTime = 0;
     private long btnSetCalibrationStartTime = 0;
     private long btnGuiDemoStartTime = 0;
+    private TextToSpeech tts;
 
     ////////private static final long GAZE_HOLD_DURATION = 1000; // 2초       2000
                                                         // 1초       1000
@@ -84,11 +87,14 @@ public class EyeTracking extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_eye);
+      
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
         gazeTrackerManager = GazeTrackerManager.makeNewInstance(this);
         Log.i(TAG, "gazeTracker version: " + GazeTracker.getVersionName());
+
+        tts = new TextToSpeech(this, status -> {});
 
         initView();
         checkPermission();
@@ -795,7 +801,7 @@ public class EyeTracking extends AppCompatActivity {
             // When calibration is finished, calibration data is stored to SharedPreference
 
             hideCalibrationView();
-            showToast("calibrationFinished", true);
+            showToast("시선 교정 완료", true);
         }
     };
 
@@ -817,11 +823,11 @@ public class EyeTracking extends AppCompatActivity {
                 switch (error) {
                     case ERROR_CAMERA_START:
                         // When if camera stream can't start
-                        showToast("ERROR_CAMERA_START ", false);
+                        // showToast("ERROR_CAMERA_START ", false);
                         break;
                     case ERROR_CAMERA_INTERRUPT:
                         // When if camera stream interrupted
-                        showToast("ERROR_CAMERA_INTERRUPT ", false);
+                        // showToast("ERROR_CAMERA_INTERRUPT ", false);
                         break;
                 }
             }
@@ -865,7 +871,7 @@ public class EyeTracking extends AppCompatActivity {
     private boolean startCalibration() {
       boolean isSuccess = gazeTrackerManager.startCalibration(calibrationType, criteria);
       if (!isSuccess) {
-        showToast("calibration start fail", false);
+        // showToast("calibration start fail", false);
       }
       setViewAtGazeTrackerState();
       return isSuccess;
@@ -888,16 +894,20 @@ public class EyeTracking extends AppCompatActivity {
       LoadCalibrationResult result = gazeTrackerManager.loadCalibrationData();
       switch (result) {
         case SUCCESS:
-          showToast("setCalibrationData success", false);
+          speakOut("빨간 점을 바라보세요");
+          showToast("빨간 점을 바라보세요", false);//showToast("setCalibrationData success", false);
           break;
         case FAIL_DOING_CALIBRATION:
-          showToast("calibrating", false);
+          speakOut("빨간 점을 바라보세요");
+          showToast("빨간 점을 바라보세요", false);//showToast("calibrating", false);
           break;
         case FAIL_NO_CALIBRATION_DATA:
-          showToast("Calibration data is null", true);
+          speakOut("빨간 점을 바라보세요");
+          showToast("빨간 점을 바라보세요", true);// showToast("Calibration data is null", true);
           break;
         case FAIL_HAS_NO_TRACKER:
-          showToast("No tracker has initialized", true);
+          speakOut("다시 시도하세요");
+          showToast("다시 시도하세요", true);//showToast("No tracker has initialized", true);
           break;
       }
       setViewAtGazeTrackerState();
@@ -906,5 +916,9 @@ public class EyeTracking extends AppCompatActivity {
     private void showGuiDemo() {
       Intent intent = new Intent(getApplicationContext(), LyricsActivity.class);
       startActivity(intent);
+    }
+  
+    private void speakOut(String text) {
+        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
     }
 }

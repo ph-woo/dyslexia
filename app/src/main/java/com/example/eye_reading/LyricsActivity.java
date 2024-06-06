@@ -1,46 +1,53 @@
-package com.example.eye_reading;
+ package com.example.eye_reading;
 
-
-import android.app.AlertDialog;
-import android.content.res.AssetManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.PointF;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import camp.visual.gazetracker.GazeTracker;
-import camp.visual.gazetracker.callback.GazeCallback;
-import camp.visual.gazetracker.filter.OneEuroFilterManager;
-import camp.visual.gazetracker.gaze.GazeInfo;
-import camp.visual.gazetracker.state.EyeMovementState;
-import camp.visual.gazetracker.util.ViewLayoutChecker;
-import java.io.IOException;
-import java.io.InputStream;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import com.example.eye_reading.GazeTrackerManager;
-import com.example.eye_reading.R;
+import camp.visual.gazetracker.GazeTracker;
+import camp.visual.gazetracker.callback.GazeCallback;
+import camp.visual.gazetracker.filter.OneEuroFilterManager;
+import camp.visual.gazetracker.gaze.GazeInfo;
+import camp.visual.gazetracker.state.EyeMovementState;
+import camp.visual.gazetracker.util.ViewLayoutChecker;
 import visual.camp.sample.view.GazePathView;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.media.MediaPlayer;
-import android.os.CountDownTimer;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.widget.Toast;
 
-public class LyricsActivity extends AppCompatActivity {
+public class LyricsActivity extends UserKeyActivity {
+
+    String songTitle = null; // 변수를 먼저 선언하고 초기화
+//    String nickname = null; // 변수를 먼저 선언하고 초기화
+    String userkey = null; // 변수를 먼저 선언하고 초기화
+
     private static final String TAG = LyricsActivity.class.getSimpleName();
+    private DatabaseReference databaseReference;
     private final ViewLayoutChecker viewLayoutChecker = new ViewLayoutChecker();
     private GazePathView gazePathView;
     private GazeTrackerManager gazeTrackerManager;
@@ -56,37 +63,49 @@ public class LyricsActivity extends AppCompatActivity {
     private int lives = 3; // 목숨의 개수
     private List<ImageView> heartImages;
 
-    private static final long GAZE_HOLD_DURATION = 650; // 0.65초
+    private static final long GAZE_HOLD_DURATION = 800; // 0.8초로 수정했습니다.
 
-    /////// 각 버튼에 대한 시선 시작 시간을 저장하는 맵을 생성합니다.
+    // 각 버튼에 대한 시선 시작 시간을 저장하는 맵을 생성합니다.
     private Map<TextView, Long> gazeStartTimeMap = new HashMap<>();
-/////////////////////////////
 
-    // 가사 및 올바른 순서
-    private String[] lyrics = {
-            "학교종이",
-            "땡땡땡",
-            "어서모이자",
-            "선생님이",
-            "우리를",
-            "기다리신다"
-    };
-    private String[] correctSequence = {"학", "교", "종", "이", "땡", "땡", "땡", "어", "서", "모", "이", "자", "선", "생", "님", "이", "우", "리", "를", "기", "다", "리", "신", "다"}; // 올바른 순서
-
-
-    // 음원 파일 재생 순서
-    private String[] soundSequence = {"솔", "솔", "라", "라", "솔", "솔", "미", "솔", "솔", "미", "미", "레", "솔", "솔", "라", "라", "솔", "솔", "미", "솔", "미", "레", "미"};
+    private String[] lyrics;
+    private String[] correctSequence;
+    private String[] soundSequence;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lyrics);
+
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("SONG_TITLE")) {
+            songTitle = intent.getStringExtra("SONG_TITLE");
+            // songTitle을 사용하여 작업 수행
+            Log.d("EyeTracking", "Received song title: " + songTitle);
+        } else {
+            Log.e("EyeTracking", "No song title provided");
+        }
+
+        userkey = getUserId();
+//        if (intent != null && intent.hasExtra("USERKEY")) {
+//           userkey = intent.getStringExtra("USERKEY");
+//            // songTitle을 사용하여 작업 수행
+//            Log.d("EyeTracking", "Received USERKEY: " + userkey);
+//        } else {
+//            Log.e("EyeTracking", "No USERKEY provided");
+//        }
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
+
+        ImageView btnBack = findViewById(R.id.btn_back);
+        btnBack.setOnClickListener(v -> onBackPressed());
+
         gazeTrackerManager = GazeTrackerManager.getInstance();
         Log.i(TAG, "gazeTracker version: " + GazeTracker.getVersionName());
-
+      
+        databaseReference = FirebaseDatabase.getInstance("https://song-62299-default-rtdb.firebaseio.com/").getReference();
 
         timerText = findViewById(R.id.timer_text);
 
@@ -98,87 +117,146 @@ public class LyricsActivity extends AppCompatActivity {
         // 2분(120초) 타이머 생성
         startTimer();
 
-        // LinearLayout 초기화
-        LinearLayout buttonsLayout1 = findViewById(R.id.buttonsLayout1); // 첫 번째 줄 LinearLayout 찾기
-        LinearLayout buttonsLayout2 = findViewById(R.id.buttonsLayout2); // 두 번째 줄 LinearLayout 찾기
-        LinearLayout buttonsLayout3 = findViewById(R.id.buttonsLayout3);
-        LinearLayout buttonsLayout4 = findViewById(R.id.buttonsLayout4);
-        LinearLayout buttonsLayout5 = findViewById(R.id.buttonsLayout5);
-        LinearLayout buttonsLayout6 = findViewById(R.id.buttonsLayout6);
-        // 버튼 초기화
+        try {
+            fetchSongData();
+        } catch (Exception e) {
+            Log.e(TAG, "Error in fetchSongData: ", e);
+        }
 
-        textViews = new TextView[correctSequence.length]; // TextView 배열 초기화
-        for (int i = 0; i < correctSequence.length; i++) { // 각 TextView 생성 반복
-            final int index = i;
+    }
 
-            // TextView 생성 및 속성 설정
-            textViews[i] = new TextView(this); // TextView 생성
-            textViews[i].setText(correctSequence[i]); // TextView 텍스트 설정
-            textViews[i].setTextSize(36); // 텍스트 크기 설정
-            textViews[i].setPadding(50, 16, 50, 16); // 패딩 설정
-            textViews[i].setClickable(true); // 클릭 가능 설정
-            textViews[i].setOnClickListener(new View.OnClickListener() { // TextView 클릭 리스너 설정
+    private void fetchSongData() {
+        System.out.println(songTitle);
+        databaseReference.child("songs").child("songs").child(songTitle).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    List<String> lyricsList = (List<String>) dataSnapshot.child("lyrics").getValue();
+                    List<String> correctSequenceList = (List<String>) dataSnapshot.child("correctSequence").getValue();
+                    List<String> soundSequenceList = (List<String>) dataSnapshot.child("soundSequence").getValue();
 
-                @Override
-                public void onClick(View v) {
-                    Log.d("Click", "" + "BUtton");
-                    if (index == correctIndex) { // 올바른 순서인지 확인
-                        textViews[index].setTextColor(getResources().getColor(android.R.color.holo_green_light)); // 올바른 순서일 경우 텍스트 색상 변경
-                        textViews[index].setClickable(false); // 클릭 불가능하게 설정
-                        playSound(soundSequence[correctIndex]); // 올바른 순서의 음원 재생
-                        if (correctIndex == correctSequence.length - 1) { // 마지막 버튼을 클릭했는지 확인
-                            currentIndex++; // 다음 가사로 이동
-                            if (currentIndex < lyrics.length) { // 모든 가사를 완료했는지 확인
-                                resetTextViewColors(); // TextView 색상 초기화
-                                correctIndex = 0; // 올바른 인덱스 초기화
-                                textViews[correctIndex].setTextColor(getResources().getColor(android.R.color.holo_purple)); // 첫 번째 눌러야 하는 버튼의 색상을 보라색으로 설정
-                            } else {
-                                showGameOverDialog(); // 게임이 완료되었을 때 처리
-                            }
-                        } else {
-                            correctIndex++; // 다음 올바른 인덱스로 이동
-                            if (correctIndex < correctSequence.length) {
-                                textViews[correctIndex].setTextColor(getResources().getColor(android.R.color.holo_purple)); // 다음 눌러야 하는 버튼의 색상을 보라색으로 설정
-                            }
-                        }
+                    System.out.println(lyricsList);
+
+                    if (lyricsList != null && correctSequenceList != null && soundSequenceList != null) {
+                        lyrics = lyricsList.toArray(new String[0]);
+                        correctSequence = correctSequenceList.toArray(new String[0]);
+                        soundSequence = soundSequenceList.toArray(new String[0]);
+                        setupGame();
                     } else {
-                        textViews[index].setTextColor(getResources().getColor(android.R.color.holo_red_light)); // 잘못된 순서일 경우 텍스트 색상 변경
-                        loseLife(); // 목숨 감소 메서드 호출
-                        playSound("error"); // 잘못된 순서일 때 'error.mp3' 재생
-                        // 오답 시 처리
-                        // 예: 다시 시도하도록 유도하는 메시지 출력
+                        Log.e(TAG, "One or more data lists are null");
                     }
+                } else {
+                    Log.e(TAG, "DataSnapshot does not exist");
                 }
-
-            });
-
-
-
-
-            // LinearLayout에 버튼 추가
-            if (i < 4) { // 첫 번째 줄에 4개의 버튼 추가
-                buttonsLayout1.addView(textViews[i]);
-            } else if(i>=4&&i<7){ // 두 번째 줄에 3개의 버튼 추가
-                buttonsLayout2.addView(textViews[i]);
-            } else if (i>=7&&i<12) {
-                buttonsLayout3.addView(textViews[i]);
-            } else if (i>=12&&i<16) {
-                buttonsLayout4.addView(textViews[i]);
-            } else if (i>=16&&i<19){
-                buttonsLayout5.addView(textViews[i]);
-            } else if (i>=19&&i<24) {
-                buttonsLayout6.addView(textViews[i]);
             }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(LyricsActivity.this, "Failed to load data", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "DatabaseError: ", databaseError.toException());
+            }
+        });
+    }
+
+    private void setupGame() {
+        LinearLayout[] buttonsLayouts = new LinearLayout[lyrics.length];
+
+        // 각 레이아웃을 동적으로 찾기 위해 for 루프를 사용합니다.
+        for (int i = 0; i < lyrics.length; i++) {
+            String layoutID = "buttonsLayout" + (i + 1);  // i가 0일 때 "buttonsLayout1"부터 시작
+            int resID = getResources().getIdentifier(layoutID, "id", getPackageName());
+            buttonsLayouts[i] = findViewById(resID);
         }
 
 
-        // 첫 번째 눌러야 하는 버튼의 색상을 보라색으로 설정
+//        buttonsLayouts[0] = findViewById(R.id.buttonsLayout1);
+//        buttonsLayouts[1] = findViewById(R.id.buttonsLayout2);
+//        buttonsLayouts[2] = findViewById(R.id.buttonsLayout3);
+//        buttonsLayouts[3] = findViewById(R.id.buttonsLayout4);
+//        buttonsLayouts[4] = findViewById(R.id.buttonsLayout5);
+//        buttonsLayouts[5] = findViewById(R.id.buttonsLayout6);
+
+        textViews = new TextView[correctSequence.length];
+        for (int i = 0; i < correctSequence.length; i++) {
+            final int index = i;
+            textViews[i] = new TextView(this);
+            textViews[i].setText(correctSequence[i]);
+            textViews[i].setTextSize(34);
+            textViews[i].setPadding(40, 16, 40, 26);
+            textViews[i].setClickable(true);
+            textViews[i].setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    handleTextViewClick(index);
+                }
+            });
+
+            if (i < lyrics[0].length()) {
+                buttonsLayouts[0].addView(textViews[i]);
+            } else if (i < lyrics[0].length()+lyrics[1].length()) {
+                buttonsLayouts[1].addView(textViews[i]);
+            } else if (i < lyrics[0].length()+lyrics[1].length()+lyrics[2].length()) {
+                buttonsLayouts[2].addView(textViews[i]);
+            } else if (i < lyrics[0].length()+lyrics[1].length()+lyrics[2].length()+lyrics[3].length()) {
+                buttonsLayouts[3].addView(textViews[i]);
+            } else if (i < lyrics[0].length()+lyrics[1].length()+lyrics[2].length()+lyrics[3].length()+lyrics[4].length()) {
+                buttonsLayouts[4].addView(textViews[i]);
+            } else if (i < lyrics[0].length()+lyrics[1].length()+lyrics[2].length()+lyrics[3].length()+lyrics[4].length()+lyrics[5].length()) {
+                buttonsLayouts[5].addView(textViews[i]);
+            }  else if (i < lyrics[0].length()+lyrics[1].length()+lyrics[2].length()+lyrics[3].length()+lyrics[4].length()+lyrics[5].length()+lyrics[6].length()) {
+                buttonsLayouts[6].addView(textViews[i]);
+            } else {
+                buttonsLayouts[7].addView(textViews[i]);
+            }
+        }
+
         textViews[correctIndex].setTextColor(getResources().getColor(android.R.color.holo_purple));
     }
 
+    private void handleTextViewClick(int index) {
+        Log.d(TAG, "Current Index: " + currentIndex + ", Correct Index: " + correctIndex + ",cs.l"+correctSequence.length);
+
+        if (index == correctIndex) {
+            if (correctIndex < textViews.length) {
+                textViews[index].setTextColor(getResources().getColor(android.R.color.holo_green_light));
+                textViews[index].setClickable(false);
+            }
+            playSound(soundSequence[correctIndex]);
+
+            if (correctIndex == correctSequence.length-1) {
+                Log.d("Game", "Success condition met, showing success dialog.");
+                showGameSuccessDialog(songTitle);
+                return;
+//                if (currentIndex < lyrics.length) {
+//                    resetTextViewColors();
+//                    correctIndex = 0;
+//                    if (correctIndex < textViews.length) {
+//                        textViews[correctIndex].setTextColor(getResources().getColor(android.R.color.holo_purple));
+//                    }
+//                } else {
+//                    showGameOverDialog();
+//                    return;
+//                }
+            } else {
+                correctIndex++;
+                if (correctIndex < correctSequence.length && correctIndex < textViews.length) {
+                    textViews[correctIndex].setTextColor(getResources().getColor(android.R.color.holo_purple));
+                }
+            }
+
+
+        } else {
+            if (index < textViews.length) {
+                textViews[index].setTextColor(getResources().getColor(android.R.color.holo_red_light));
+            }
+            loseLife();
+            playSound("error");
+        }
+    }
+
     private void resetTextViewColors() {
-        for (int i = 0; i < textViews.length; i++) {
-            textViews[i].setTextColor(getResources().getColor(android.R.color.black)); // TextView 텍스트 색상을 검정색으로 설정하여 초기화
+        for (TextView textView : textViews) {
+            textView.setTextColor(getResources().getColor(android.R.color.black));
         }
     }
 
@@ -209,6 +287,7 @@ public class LyricsActivity extends AppCompatActivity {
         // 현재 액티비티를 다시 시작하여 게임을 초기화
         Intent intent = getIntent();
         finish();
+        gazeTrackerManager.startGazeTracking();
         startActivity(intent);
     }
 
@@ -237,20 +316,35 @@ public class LyricsActivity extends AppCompatActivity {
 
         // note에 따라 음원 파일의 리소스 ID 설정
         switch (note) {
-            case "솔":
-                soundResId = R.raw.piano08; // 솔 음원 파일 리소스 ID
-                break;
-            case "라":
-                soundResId = R.raw.piano10; // 라 음원 파일 리소스 ID
-                break;
-            case "미":
-                soundResId = R.raw.piano05; // 미 음원 파일 리소스 ID
+            case "도":
+                soundResId = R.raw.lowdo;
                 break;
             case "레":
-                soundResId = R.raw.piano03; // 레 음원 파일 리소스 ID
+                soundResId = R.raw.re;
+                break;
+            case "미":
+                soundResId = R.raw.me;
+                break;
+            case "파":
+                soundResId = R.raw.pa;
+                break;
+            case "솔":
+                soundResId = R.raw.sol;
+                break;
+            case "라":
+                soundResId = R.raw.ra;
+                break;
+            case "시":
+                soundResId = R.raw.si;
+                break;
+            case "또":
+                soundResId = R.raw.highdo;
+                break;
+            case "렐":
+                soundResId = R.raw.highre;
                 break;
             case "error":
-                soundResId = R.raw.error; // error 음원 파일 리소스 ID
+                soundResId = R.raw.error;
                 break;
         }
 
@@ -261,30 +355,162 @@ public class LyricsActivity extends AppCompatActivity {
     }
 
 
+
+
+
+    // 게임 성공 다이얼로그를 표시하는 메서드
+    private void showGameSuccessDialog(String songTitle) {
+        gazeTrackerManager.stopGazeTracking();
+
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.gameover_dialog, null);
+
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setView(dialogView);
+        builder.setCancelable(false);
+        android.app.AlertDialog alertDialog = builder.create();
+
+        TextView title = dialogView.findViewById(R.id.title);
+        TextView bookmarkCountTextView = dialogView.findViewById(R.id.bookmark_count);
+        title.setText("게임 성공");
+        bookmarkCountTextView.setText("10개 획득");
+
+        Button playAgainButton = dialogView.findViewById(R.id.play_again_btn);
+        playAgainButton.setVisibility(View.GONE);
+
+        Button exitButton = dialogView.findViewById(R.id.exit_btn);
+        exitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LyricsActivity.this, SongActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        int a = -1;
+        if (songTitle.equals("곰세마리")) {
+            a = 0;
+        } else if (songTitle.equals("나비야")) {
+            a = 1;
+        }else if (songTitle.equals("나처럼 해봐요")) {
+            a = 2;
+        }else if (songTitle.equals("달 달 무슨달")) {
+            a = 3;
+        }else if (songTitle.equals("릿자로 끝나는")) {
+            a = 4;
+        }else if (songTitle.equals("비행기")) {
+            a = 5;
+        }else if (songTitle.equals("악어떼")) {
+            a = 6;
+        }else if (songTitle.equals("얼룩송아지")) {
+            a = 7;
+        }else if (songTitle.equals("작은 별")) {
+            a = 8;
+        }else if (songTitle.equals("학교종이 땡땡땡")) {
+            a = 9;
+        }
+        Log.d("LyricsActivity", "Mapped songTitle to index: " + a);
+
+        // bookmarkcount 값을 가져와서 +10을 더한 후 업데이트
+        DatabaseReference bookmarkCountRef = databaseReference.child("Users").child(userkey).child("bookmarkcount");
+        DatabaseReference game3Ref = databaseReference.child("Users").child(userkey).child("game3").child(String.valueOf(a));
+
+        game3Ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Integer game3Value = dataSnapshot.getValue(Integer.class);
+                if (game3Value != null && game3Value.equals(0)) {
+                    bookmarkCountRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                Long currentCount = dataSnapshot.getValue(Long.class);
+                                if (currentCount != null) {
+                                    bookmarkCountRef.setValue(currentCount + 10)
+                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    if (task.isSuccessful()) {
+                                                        Log.d("LyricsActivity", "Bookmark count updated successfully.");
+
+                                                        // 값을 1로 변경합니다.
+                                                        game3Ref.setValue(1)
+                                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                    @Override
+                                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                                        if (task.isSuccessful()) {
+                                                                            Log.d("Firebase", "Element updated successfully.");
+                                                                        } else {
+                                                                            Log.e("Firebase", "Failed to update element.", task.getException());
+                                                                        }
+                                                                    }
+                                                                });
+                                                    } else {
+                                                        Log.e("LyricsActivity", "Failed to update bookmark count.", task.getException());
+                                                    }
+                                                }
+                                            });
+                                } else {
+                                    Log.e("LyricsActivity", "Current bookmark count is null.");
+                                }
+                            } else {
+                                Log.e("LyricsActivity", "Bookmark count does not exist.");
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            Log.e("LyricsActivity", "Database error: " + databaseError.getMessage());
+                        }
+                    });
+                } else {
+                    Log.e("LyricsActivity", "game3 value is not 0 or is null.");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e("LyricsActivity", "Database error: " + databaseError.getMessage());
+            }
+        });
+        alertDialog.show();
+    }
+
     private void showGameOverDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Game Over!"); // 팝업 창 제목 설정
-        builder.setMessage("게임 오버!").setCancelable(false); // 팝업 창 메시지 설정
+        if (isFinishing() || isDestroyed()) {
+            return;
+        }
+        gazeTrackerManager.stopGazeTracking();
 
-        // "다시하기" 버튼 추가 및 클릭 리스너 설정
-        builder.setPositiveButton("다시하기", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                dialog.dismiss(); // 팝업 창 닫기
-                restartGame(); // 게임을 다시 시작하는 메서드 호출
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.gameover_dialog, null);
+
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setView(dialogView);
+        builder.setCancelable(false);
+        android.app.AlertDialog alertDialog = builder.create();
+
+        TextView bookmarkCountTextView = dialogView.findViewById(R.id.bookmark_count);
+        bookmarkCountTextView.setText("획득 실패");
+
+        Button playAgainButton = dialogView.findViewById(R.id.play_again_btn);
+        playAgainButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.dismiss();
+                restartGame();
             }
         });
-
-        // "메뉴창으로 가기" 버튼 추가 및 클릭 리스너 설정
-        builder.setNegativeButton("메뉴창으로 가기", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                dialog.dismiss(); // 팝업 창 닫기
-//                goToMainMenu(); // 메인 메뉴로 이동하는 메서드 호출
+      
+        Button exitButton = dialogView.findViewById(R.id.exit_btn);
+        exitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LyricsActivity.this, SongActivity.class);
+                startActivity(intent);
+                finish();
             }
         });
-
-        // AlertDialog 생성 및 표시
-        AlertDialog alert = builder.create();
-        alert.show();
+        alertDialog.show();
     }
 
     private void startTimer() {
@@ -299,7 +525,6 @@ public class LyricsActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
                 showGameOverDialog();
-                // Game over logic here
             }
         }.start();
     }
@@ -336,6 +561,9 @@ public class LyricsActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
         super.onDestroy();
     }
 
@@ -394,5 +622,10 @@ public class LyricsActivity extends AppCompatActivity {
                 gazeStartTimeMap.remove(textView); // 시선이 벗어나면 맵에서 제거
             }
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
     }
 }

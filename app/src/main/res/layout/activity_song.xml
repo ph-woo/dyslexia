@@ -27,6 +27,7 @@
             android:layout_centerHorizontal="true"
             android:text="눈으로 불러요"
             android:textSize="30sp"
+            android:textStyle="bold"
             android:textColor="@color/brown" />
     </RelativeLayout>
 
