@@ -50,7 +50,7 @@ public class DeliveryActivity extends UserKeyActivity {
     private List<WordPair> wordList;
     private String targetWord;
     private List<String> candidateWords;
-    private String currentCharacter = getUserCurrentCharacter();
+    private String currentCharacter;
     private int bookmarks = 0;
     private TextToSpeech tts;
     private MediaPlayer deliverySuccess, deliveryFailure;
@@ -88,7 +88,7 @@ public class DeliveryActivity extends UserKeyActivity {
 //            Log.e("HomeAct", "No userkey provided");
 //        }
 
-        userKey=getUserId();
+        userKey = getUserId();
 
         databaseReference = FirebaseDatabase.getInstance("https://song-62299-default-rtdb.firebaseio.com/").getReference();
 
@@ -107,8 +107,6 @@ public class DeliveryActivity extends UserKeyActivity {
         characterFace = findViewById(R.id.character_face);
         container = findViewById(R.id.container);
         timerText = findViewById(R.id.timer_text);
-
-        setCharacterFace();
 
         house1Text = findViewById(R.id.house1_word);
         house2Text = findViewById(R.id.house2_word);
@@ -131,6 +129,8 @@ public class DeliveryActivity extends UserKeyActivity {
 
         handler = new Handler(Looper.getMainLooper());
         handler.post(gazeRunnable);
+
+        getCurrentCharacter();
 
         fetchData();
         startTimer();
@@ -170,6 +170,28 @@ public class DeliveryActivity extends UserKeyActivity {
                         return true;
                 }
                 return false;
+            }
+        });
+    }
+
+    public void getCurrentCharacter() {
+        databaseReference.child("Users").child(userKey).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // currentCharacter 값을 가져와 설정
+                if (dataSnapshot.child("currentCharacter").exists()) {
+                    currentCharacter = dataSnapshot.child("currentCharacter").getValue(String.class);
+                } else {
+                    currentCharacter = "기본 캐릭터"; // 기본 값 설정
+                }
+                System.out.println("현재 캐릭터: " + currentCharacter);
+                setCharacterFace();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // 데이터베이스 접근 중 오류 발생 시 처리
+                System.err.println("데이터 읽기 실패: " + databaseError.getMessage());
             }
         });
     }
@@ -239,7 +261,7 @@ public class DeliveryActivity extends UserKeyActivity {
         }
     }
 
-    private boolean checkHouse(View truck) {
+    private synchronized boolean checkHouse(View truck) {
         ImageView house1 = findViewById(R.id.house1);
         ImageView house2 = findViewById(R.id.house2);
         ImageView house3 = findViewById(R.id.house3);
@@ -492,9 +514,11 @@ public class DeliveryActivity extends UserKeyActivity {
                     truck.setY(newTruckY);
                 }
 
-                if (checkHouse(truck)) {
-                    truck.setX(initialTruckX);
-                    truck.setY(initialTruckY);
+                synchronized (this) {
+                    if (checkHouse(truck)) {
+                        truck.setX(initialTruckX);
+                        truck.setY(initialTruckY);
+                    }
                 }
             });
         }
@@ -505,7 +529,6 @@ public class DeliveryActivity extends UserKeyActivity {
         public void onInitialized(GazeTracker gazeTracker, InitializationErrorType error) {
             if (gazeTracker != null) {
                 oneEuroFilterManager = new OneEuroFilterManager(2);
-                gazeTrackerManager.setGazeTrackerCallbacks(gazeCallback);
                 gazeTrackerManager.startGazeTracking();
             } else {
                 showToast("GazeTracker 초기화 실패: " + error.name());

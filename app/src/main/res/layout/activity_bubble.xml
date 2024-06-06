@@ -71,8 +71,7 @@
             <ImageView
                 android:id="@+id/character_image"
                 android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:src="@drawable/character_dog" />
+                android:layout_height="100dp" />
 
             <ImageView
                 android:id="@+id/gun"

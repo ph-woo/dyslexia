@@ -70,8 +70,7 @@
                 android:id="@+id/character_face"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_marginLeft="16dp"
-                android:src="@drawable/face_dog" />
+                android:layout_marginLeft="16dp" />
 
             <ImageView
                 android:id="@+id/bike"

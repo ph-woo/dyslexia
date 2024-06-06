@@ -62,7 +62,7 @@ public class BubbleActivity extends UserKeyActivity {
     private List<ImageView> heartImages;
     private Animation shootAnimation;
     private RelativeLayout characterLayout;
-    private String currentCharacter = getUserCurrentCharacter();
+    private String currentCharacter;
     private ImageView characterImage;
     private GazePathView gazePathView;
     private GazeTrackerManager gazeTrackerManager;
@@ -96,6 +96,8 @@ public class BubbleActivity extends UserKeyActivity {
 //            Log.e("HomeAct", "No userkey provided");
 //        }
 
+        databaseReference = FirebaseDatabase.getInstance("https://song-62299-default-rtdb.firebaseio.com/").getReference();
+
         userKey = getUserId();
 
         tts = new TextToSpeech(this, status -> {
@@ -121,8 +123,6 @@ public class BubbleActivity extends UserKeyActivity {
         soundButton = findViewById(R.id.sound);
         soundButton.setOnClickListener(v -> speakOut(targetWord));
 
-        setCharacterImage();
-
         shootAnimation = new RotateAnimation(
                 0, -10, // fromDegrees, toDegrees
                 Animation.RELATIVE_TO_SELF, 0.5f,
@@ -133,10 +133,33 @@ public class BubbleActivity extends UserKeyActivity {
         characterLayout = findViewById(R.id.character);
         characterImage = findViewById(R.id.character_image);
 
+        getCurrentCharacter();
+
         gazeTrackerManager = GazeTrackerManager.getInstance();
 
-        databaseReference = FirebaseDatabase.getInstance("https://song-62299-default-rtdb.firebaseio.com/").getReference();
         fetchData();
+    }
+
+    public void getCurrentCharacter() {
+        databaseReference.child("Users").child(userKey).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // currentCharacter 값을 가져와 설정
+                if (dataSnapshot.child("currentCharacter").exists()) {
+                    currentCharacter = dataSnapshot.child("currentCharacter").getValue(String.class);
+                } else {
+                    currentCharacter = "기본 캐릭터"; // 기본 값 설정
+                }
+                System.out.println("현재 캐릭터: " + currentCharacter);
+                setCharacterImage();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // 데이터베이스 접근 중 오류 발생 시 처리
+                System.err.println("데이터 읽기 실패: " + databaseError.getMessage());
+            }
+        });
     }
 
     private void fetchData() {
