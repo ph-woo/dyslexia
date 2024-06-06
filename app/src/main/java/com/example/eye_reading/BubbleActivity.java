@@ -46,7 +46,7 @@ import java.util.Random;
 
 import visual.camp.sample.view.GazePathView;
 
-public class BubbleActivity extends AppCompatActivity {
+public class BubbleActivity extends UserKeyActivity {
     private DatabaseReference databaseReference;
     String userKey;
     private List<WordCharacterPair> wordList;
@@ -84,15 +84,17 @@ public class BubbleActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("");
         }
 
-        Intent bubbleIntent = getIntent();
+//        Intent bubbleIntent = getIntent();
+//
+//        if (bubbleIntent != null && bubbleIntent.hasExtra("USERKEY")) {
+//            userKey = bubbleIntent.getStringExtra("USERKEY");
+//
+//            Log.d("HomeAct", "Received userkey: " + userKey);
+//        } else {
+//            Log.e("HomeAct", "No userkey provided");
+//        }
 
-        if (bubbleIntent != null && bubbleIntent.hasExtra("USERKEY")) {
-            userKey = bubbleIntent.getStringExtra("USERKEY");
-
-            Log.d("HomeAct", "Received userkey: " + userKey);
-        } else {
-            Log.e("HomeAct", "No userkey provided");
-        }
+        userKey = getUserId();
 
         tts = new TextToSpeech(this, status -> {
             if (status != TextToSpeech.ERROR) {

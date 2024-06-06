@@ -54,7 +54,7 @@ import visual.camp.sample.view.DrowsinessView;
 import visual.camp.sample.view.EyeBlinkView;
 import visual.camp.sample.view.PointView;
 
-public class GameActivity extends AppCompatActivity {
+public class GameActivity extends UserKeyActivity {
     String nickname="";
     String userkey="";
 
@@ -91,23 +91,26 @@ public class GameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
+userkey = getUserId();
+nickname = getUserNickname();
 
-        Intent gameIntent = getIntent();
-        if (gameIntent != null && gameIntent.hasExtra("USERNAME")) {
-            nickname= gameIntent.getStringExtra("USERNAME");
 
-            Log.d("HomeAct", "Received nickname: " + nickname);
-        } else {
-            Log.e("HomeAct", "No nickname provided");
-        }
-
-        if (gameIntent != null && gameIntent.hasExtra("USERKEY")) {
-           userkey= gameIntent.getStringExtra("USERKEY");
-
-            Log.d("HomeAct", "Received userkey: " + userkey);
-        } else {
-            Log.e("HomeAct", "No userkey provided");
-        }
+//        Intent gameIntent = getIntent();
+//        if (gameIntent != null && gameIntent.hasExtra("USERNAME")) {
+//            nickname= gameIntent.getStringExtra("USERNAME");
+//
+//            Log.d("HomeAct", "Received nickname: " + nickname);
+//        } else {
+//            Log.e("HomeAct", "No nickname provided");
+//        }
+//
+//        if (gameIntent != null && gameIntent.hasExtra("USERKEY")) {
+//           userkey= gameIntent.getStringExtra("USERKEY");
+//
+//            Log.d("HomeAct", "Received userkey: " + userkey);
+//        } else {
+//            Log.e("HomeAct", "No userkey provided");
+//        }
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
@@ -335,8 +338,8 @@ public class GameActivity extends AppCompatActivity {
 
         navHome.setOnClickListener(v -> {
             Intent homeIntent = new Intent(getApplicationContext(), HomeActivity.class);
-            homeIntent.putExtra("USERNAME", nickname);
-            homeIntent.putExtra("USERKEY", userkey);
+//            homeIntent.putExtra("USERNAME", nickname);
+//            homeIntent.putExtra("USERKEY", userkey);
             startActivity(homeIntent);
         });
 
@@ -344,8 +347,8 @@ public class GameActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent userIntent = new Intent(GameActivity.this, UserActivity.class);
-                userIntent.putExtra("USERNAME", nickname);
-                userIntent.putExtra("USERKEY", userkey);
+//                userIntent.putExtra("USERNAME", nickname);
+//                userIntent.putExtra("USERKEY", userkey);
                 startActivity(userIntent);
             }
         });
@@ -724,18 +727,18 @@ public class GameActivity extends AppCompatActivity {
             showToast("시선 교정 완료", true);
             if(mode == 1 ){
                 Intent intent = new Intent(getApplicationContext(), BubbleActivity.class);
-                intent.putExtra("USERNAME", nickname);
-                intent.putExtra("USERKEY", userkey);
+//                intent.putExtra("USERNAME", nickname);
+//                intent.putExtra("USERKEY", userkey);
                 startActivity(intent);
             }else if(mode == 2){
                 Intent intent = new Intent(getApplicationContext(), DeliveryActivity.class);
-                intent.putExtra("USERNAME", nickname);
-                intent.putExtra("USERKEY", userkey);
+//                intent.putExtra("USERNAME", nickname);
+//                intent.putExtra("USERKEY", userkey);
                 startActivity(intent);
             }else if(mode == 3 ){
                 Intent intent = new Intent(getApplicationContext(), SongActivity.class);
-                intent.putExtra("USERNAME", nickname);
-                intent.putExtra("USERKEY", userkey);
+//                intent.putExtra("USERNAME", nickname);
+//                intent.putExtra("USERKEY", userkey);
                 startActivity(intent);
             }
 
